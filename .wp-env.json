@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/wp-env.json",
+	"core": null,
+	"phpVersion": "8.2",
+	"plugins": [ "./plugins/dsg-core" ],
+	"themes": [ "./themes/dsg-theme" ],
+	"mappings": {
+		"wp-content/dsg-repo": "."
+	},
+	"config": {
+		"WP_DEBUG": true,
+		"WP_DEBUG_LOG": true,
+		"SCRIPT_DEBUG": true,
+		"WP_ENVIRONMENT_TYPE": "local"
+	},
+	"lifecycleScripts": {
+		"afterStart": "wp-env run cli wp theme activate dsg-theme && wp-env run cli wp rewrite structure /%postname%/ --hard"
+	}
+}

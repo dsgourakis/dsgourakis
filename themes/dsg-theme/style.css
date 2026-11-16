@@ -1,0 +1,37 @@
+/*
+Theme Name: DSG Theme
+Theme URI: https://www.dsgourakis.com
+Author: Dimitris Sgourakis
+Author URI: https://www.dsgourakis.com
+Description: Block theme for dsgourakis.com. Design settings live in theme.json.
+Version: 0.1.0
+Requires at least: 6.6
+Tested up to: 6.9
+Requires PHP: 8.2
+License: GPL-2.0-or-later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: dsg-theme
+*/
+
+/*
+ * Most styling belongs in theme.json. Keep this file for the few things
+ * theme.json cannot express yet.
+ */
+
+/* Visible focus outline for keyboard users on every interactive element. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+	outline: 3px solid var(--wp--preset--color--accent);
+	outline-offset: 3px;
+}
+
+/* Respect users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

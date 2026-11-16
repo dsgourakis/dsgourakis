@@ -1,0 +1,10 @@
+{
+	"recommendations": [
+		"editorconfig.editorconfig",
+		"dbaeumer.vscode-eslint",
+		"esbenp.prettier-vscode",
+		"bmewburn.vscode-intelephense-client",
+		"shevaua.phpcs",
+		"ms-vscode-remote.remote-wsl"
+	]
+}

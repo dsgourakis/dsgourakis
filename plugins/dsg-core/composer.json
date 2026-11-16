@@ -1,0 +1,20 @@
+{
+	"name": "dsgourakis/dsg-core",
+	"description": "Custom post types, blocks and site functionality for dsgourakis.com.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"php": ">=8.2"
+	},
+	"autoload": {
+		"psr-4": {
+			"DSG\\Core\\": "includes/"
+		}
+	},
+	"config": {
+		"platform": {
+			"php": "8.2"
+		},
+		"optimize-autoloader": true
+	}
+}

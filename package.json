@@ -1,0 +1,31 @@
+{
+	"name": "dsgourakis-portfolio",
+	"version": "0.1.0",
+	"private": true,
+	"description": "dsgourakis.com: block theme, custom blocks and tooling.",
+	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": ">=20"
+	},
+	"scripts": {
+		"start": "wp-scripts start --webpack-src-dir=plugins/dsg-core/src --output-path=plugins/dsg-core/build --webpack-copy-php",
+		"build": "wp-scripts build --webpack-src-dir=plugins/dsg-core/src --output-path=plugins/dsg-core/build --webpack-copy-php",
+		"lint:js": "wp-scripts lint-js plugins/dsg-core/src",
+		"lint:css": "wp-scripts lint-style \"plugins/dsg-core/src/**/*.scss\" \"themes/dsg-theme/**/*.css\"",
+		"lint:php": "composer lint",
+		"lint": "npm run lint:js && npm run lint:css && npm run lint:php",
+		"format": "wp-scripts format plugins/dsg-core/src",
+		"env:start": "wp-env start",
+		"env:stop": "wp-env stop",
+		"env:reset": "wp-env clean all",
+		"wp": "wp-env run cli wp",
+		"test:js": "wp-scripts test-unit-js plugins/dsg-core/src",
+		"test:php": "wp-env run tests-cli --env-cwd=wp-content/dsg-repo vendor/bin/phpunit"
+	},
+	"devDependencies": {
+		"@wordpress/env": "^10",
+		"@wordpress/scripts": "^30",
+		"typescript": "^5.9"
+	},
+	"//": "typescript is pinned to v5 because the WordPress ESLint rules do not work with TypeScript 7 yet."
+}

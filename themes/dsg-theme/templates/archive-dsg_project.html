@@ -1,0 +1,27 @@
+<!-- wp:template-part {"slug":"header","area":"header"} /-->
+
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+	<!-- wp:heading {"level":1} -->
+	<h1 class="wp-block-heading">Portfolio</h1>
+	<!-- /wp:heading -->
+
+	<!-- wp:query {"queryId":2,"query":{"perPage":12,"postType":"dsg_project","inherit":true},"align":"wide"} -->
+	<div class="wp-block-query alignwide">
+		<!-- wp:post-template {"layout":{"type":"grid","columnCount":3,"minimumColumnWidth":"18rem"}} -->
+			<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"16/10","style":{"border":{"radius":"12px"}}} /-->
+			<!-- wp:post-title {"isLink":true,"level":2,"fontSize":"large"} /-->
+			<!-- wp:post-excerpt /-->
+			<!-- wp:post-terms {"term":"dsg_technology","separator":" · ","fontSize":"small"} /-->
+		<!-- /wp:post-template -->
+		<!-- wp:query-no-results -->
+			<!-- wp:paragraph -->
+			<p>No projects yet.</p>
+			<!-- /wp:paragraph -->
+		<!-- /wp:query-no-results -->
+	</div>
+	<!-- /wp:query -->
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","area":"footer"} /-->

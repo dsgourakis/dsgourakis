@@ -1,0 +1,66 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "dsg/project-card",
+	"version": "0.1.0",
+	"title": "Project Card",
+	"category": "design",
+	"icon": "portfolio",
+	"description": "A portfolio project with image, title, summary, technologies and a link.",
+	"keywords": [ "portfolio", "project", "card" ],
+	"textdomain": "dsg-core",
+	"attributes": {
+		"title": {
+			"type": "string",
+			"source": "html",
+			"selector": ".wp-block-dsg-project-card__title-text"
+		},
+		"summary": {
+			"type": "string",
+			"source": "html",
+			"selector": ".wp-block-dsg-project-card__summary"
+		},
+		"url": {
+			"type": "string",
+			"default": ""
+		},
+		"imageId": {
+			"type": "number"
+		},
+		"imageUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"imageAlt": {
+			"type": "string",
+			"default": ""
+		},
+		"technologies": {
+			"type": "array",
+			"items": { "type": "string" },
+			"default": []
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": [ "wide" ],
+		"color": {
+			"background": true,
+			"text": true
+		},
+		"spacing": {
+			"padding": true,
+			"margin": true
+		}
+	},
+	"example": {
+		"attributes": {
+			"title": "Hellenic Red Cross",
+			"summary": "Custom WordPress theme with reusable blocks and a full content migration.",
+			"technologies": [ "WordPress", "PHP", "ACF" ]
+		}
+	},
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css"
+}

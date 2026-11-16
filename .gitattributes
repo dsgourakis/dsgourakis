@@ -1,0 +1,11 @@
+# Always store and check out text files with LF line endings.
+# Important on Windows: Docker (Linux), PHPCS and shell scripts expect LF.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.woff2 binary
+*.ico binary

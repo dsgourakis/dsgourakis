@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<phpunit
+	bootstrap="plugins/dsg-core/tests/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	convertErrorsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
+>
+	<testsuites>
+		<testsuite name="dsg-core">
+			<directory prefix="test-" suffix=".php">./plugins/dsg-core/tests/</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>

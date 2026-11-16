@@ -1,0 +1,86 @@
+# Deploy: push to `develop` → staging, push to `main` → production.
+# Nothing is deployed unless all CI checks pass first.
+#
+# Setup (once), in GitHub → Settings → Environments:
+#   Create two environments: "staging" and "production".
+#   In EACH environment add:
+#     Secrets:   SSH_HOST, SSH_PORT, SSH_USER, SSH_PRIVATE_KEY
+#     Variables: WP_CONTENT_PATH  (path to that site's wp-content folder, see README)
+#   For "production", tick "Required reviewers" and add yourself,
+#   so production waits for your approval click.
+name: Deploy
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: Deploy to ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    needs: checks
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Build blocks for production
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install plugin autoloader (no dev tools)
+        run: composer install --working-dir=plugins/dsg-core --no-dev --optimize-autoloader --no-interaction --no-progress
+
+      - name: Set up SSH
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${SSH_PORT:-22}" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Upload plugin and theme
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          WP_CONTENT_PATH: ${{ vars.WP_CONTENT_PATH }}
+        run: |
+          if [ -z "$WP_CONTENT_PATH" ]; then
+            echo "WP_CONTENT_PATH is not set for this environment." && exit 1
+          fi
+          SSH="ssh -i ~/.ssh/deploy_key -p ${SSH_PORT:-22}"
+
+          rsync -az --delete --exclude-from=.deployignore -e "$SSH" \
+            plugins/dsg-core/ "$SSH_USER@$SSH_HOST:$WP_CONTENT_PATH/plugins/dsg-core/"
+
+          rsync -az --delete --exclude-from=.deployignore -e "$SSH" \
+            themes/dsg-theme/ "$SSH_USER@$SSH_HOST:$WP_CONTENT_PATH/themes/dsg-theme/"
+
+      - name: Clean up key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
