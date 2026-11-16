@@ -8,20 +8,20 @@
  * @package DSG\Core
  */
 
-$dsg_tests_dir = getenv( 'WP_TESTS_DIR' );
-if ( ! $dsg_tests_dir ) {
-	$dsg_tests_dir = '/wordpress-phpunit';
+$dsg_core_tests_dir = getenv( 'WP_TESTS_DIR' );
+if ( ! $dsg_core_tests_dir ) {
+	$dsg_core_tests_dir = '/wordpress-phpunit';
 }
 
-if ( ! file_exists( $dsg_tests_dir . '/includes/functions.php' ) ) {
-	echo "WordPress test library not found in {$dsg_tests_dir}. Run the tests with: npm run test:php" . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI output.
+if ( ! file_exists( $dsg_core_tests_dir . '/includes/functions.php' ) ) {
+	echo "WordPress test library not found in {$dsg_core_tests_dir}. Run the tests with: npm run test:php" . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI output.
 	exit( 1 );
 }
 
 // The test library needs the PHPUnit Polyfills, installed by Composer in the repo root.
-define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', dirname( __DIR__, 3 ) . '/vendor/yoast/phpunit-polyfills' );
+define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', dirname( __DIR__, 3 ) . '/vendor/yoast/phpunit-polyfills' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Name required by the WP test library.
 
-require_once $dsg_tests_dir . '/includes/functions.php';
+require_once $dsg_core_tests_dir . '/includes/functions.php';
 
 // Load the plugin before WordPress finishes loading, like a must-use plugin.
 tests_add_filter(
@@ -31,4 +31,4 @@ tests_add_filter(
 	}
 );
 
-require $dsg_tests_dir . '/includes/bootstrap.php';
+require $dsg_core_tests_dir . '/includes/bootstrap.php';

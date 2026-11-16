@@ -40,12 +40,16 @@
 		</properties>
 	</rule>
 
-	<!-- Every global function, constant and hook must start with one of these prefixes. -->
+	<!--
+		Every global function, constant, variable and hook must start with one of these prefixes.
+		WPCS requires each prefix to be at least 4 characters long.
+	-->
 	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
 		<properties>
 			<property name="prefixes" type="array">
-				<element value="dsg"/>
-				<element value="DSG"/>
+				<element value="dsg_core"/>
+				<element value="dsg_theme"/>
+				<element value="DSG\Core"/>
 			</property>
 		</properties>
 	</rule>
