@@ -22,3 +22,4 @@ Thumbs.db
 /docs/deployment.md
 /docs/portfolio-remake-plan.md
 /docs/launch-checklist.md
+/scripts/pull-db.sh
