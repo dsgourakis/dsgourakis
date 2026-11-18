@@ -57,6 +57,22 @@ Text Domain: dsg-theme
 	color: var(--wp--preset--color--contrast);
 }
 
+/*
+ * In-page links (like "See work ↓") glide to their section instead of jumping.
+ * Only for people who haven't asked their system for less motion.
+ */
+@media (prefers-reduced-motion: no-preference) {
+
+	html {
+		scroll-behavior: smooth;
+	}
+}
+
+/* Leave a little space above a section when a link scrolls to it. */
+[id] {
+	scroll-margin-top: var(--wp--preset--spacing--50);
+}
+
 /* Respect users who ask for less motion. */
 @media (prefers-reduced-motion: reduce) {
 
