@@ -24,7 +24,7 @@ class Test_Blocks extends WP_UnitTestCase {
 	public function test_blocks_are_registered() {
 		$registry = WP_Block_Type_Registry::get_instance();
 
-		foreach ( array( 'dsg/project-card', 'dsg/project-grid', 'dsg/section-header', 'dsg/stat', 'dsg/stats', 'dsg/tech-stack' ) as $name ) {
+		foreach ( array( 'dsg/hero', 'dsg/project-card', 'dsg/project-grid', 'dsg/section-header', 'dsg/stat', 'dsg/stats', 'dsg/tech-stack' ) as $name ) {
 			$this->assertTrue( $registry->is_registered( $name ), "$name is not registered. Did you run \"npm run build\"?" );
 		}
 	}
@@ -102,6 +102,64 @@ class Test_Blocks extends WP_UnitTestCase {
 
 	public function test_section_header_renders_nothing_when_empty() {
 		$this->assertSame( '', trim( do_blocks( '<!-- wp:dsg/section-header /-->' ) ) );
+	}
+
+	/**
+	 * The block comment for a Hero. serialize_block_attributes() escapes the
+	 * HTML in the attributes the same way the editor does when it saves.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return string
+	 */
+	private static function hero_comment( array $attributes ): string {
+		return '<!-- wp:dsg/hero ' . serialize_block_attributes( $attributes ) . ' -->';
+	}
+
+	public function test_hero_renders_heading_tagline_buttons_and_monogram() {
+		$html = do_blocks(
+			self::hero_comment(
+				array(
+					'heading' => 'Hi,<br>I\'m <mark class="has-inline-color has-accent-color">D</mark>imitris',
+					'tagline' => 'WordPress developer',
+				)
+			)
+			. '<!-- wp:buttons --><div class="wp-block-buttons"><!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/contact/">Contact me</a></div><!-- /wp:button --></div><!-- /wp:buttons -->'
+			. '<!-- /wp:dsg/hero -->'
+		);
+
+		// Wrapper with the block class, the default "wide" alignment and the code tags on.
+		$this->assertMatchesRegularExpression( '/<div class="(?=[^"]*\bwp-block-dsg-hero\b)(?=[^"]*\balignwide\b)(?=[^"]*\bhas-code-tags\b)/', $html );
+		$this->assertStringContainsString( '<h1 class="wp-block-dsg-hero__title">Hi,<br>I\'m <mark class="has-inline-color has-accent-color">D</mark>imitris</h1>', $html );
+		$this->assertStringContainsString( '<p class="wp-block-dsg-hero__tagline">WordPress developer</p>', $html );
+		$this->assertStringContainsString( 'href="/contact/">Contact me</a>', $html );
+
+		// Two copies of the default "D", hidden from screen readers.
+		$this->assertStringContainsString( '<div class="wp-block-dsg-hero__monogram" aria-hidden="true">', $html );
+		$this->assertSame( 2, substr_count( $html, 'wp-block-dsg-hero__letter' ) );
+	}
+
+	public function test_hero_skips_empty_parts() {
+		$html = do_blocks( '<!-- wp:dsg/hero {"heading":"Hi","monogram":"","showCodeTags":false} /-->' );
+
+		$this->assertStringNotContainsString( '__tagline', $html );
+		$this->assertStringNotContainsString( '__actions', $html );
+		$this->assertStringNotContainsString( '__monogram', $html );
+		$this->assertStringNotContainsString( 'has-code-tags', $html );
+	}
+
+	public function test_hero_escapes_unsafe_values() {
+		$html = do_blocks(
+			self::hero_comment(
+				array(
+					'heading'  => '<script>bad</script>Hi',
+					'monogram' => '<b>',
+				)
+			) . '<!-- /wp:dsg/hero -->'
+		);
+
+		$this->assertStringNotContainsString( '<script>', $html );
+		$this->assertStringNotContainsString( '<b>', $html );
+		$this->assertStringContainsString( '&lt;b&gt;', $html );
 	}
 
 	public function test_tech_stack_renders_a_labelled_list() {

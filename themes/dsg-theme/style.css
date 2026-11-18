@@ -24,6 +24,39 @@ Text Domain: dsg-theme
 	outline-offset: 3px;
 }
 
+/*
+ * Button styles. Here rather than theme.json because they need hover
+ * states, and core's own outline CSS would otherwise win on hover.
+ */
+
+/* Outline: accent border and text; fills with the accent on hover. */
+.wp-block-button.is-style-outline > .wp-block-button__link {
+	background-color: transparent;
+	border-color: var(--wp--preset--color--accent);
+	color: var(--wp--preset--color--accent);
+}
+
+/* Text link: same type as a button, without the box. */
+.wp-block-button.is-style-text > .wp-block-button__link {
+	padding-left: 0.625rem;
+	padding-right: 0.625rem;
+	background-color: transparent;
+	border-color: transparent;
+	color: var(--wp--preset--color--muted);
+}
+
+.wp-block-button.is-style-outline > .wp-block-button__link:hover {
+	background-color: var(--wp--preset--color--accent);
+	border-color: var(--wp--preset--color--accent);
+	color: var(--wp--preset--color--on-accent);
+}
+
+.wp-block-button.is-style-text > .wp-block-button__link:hover {
+	background-color: transparent;
+	border-color: transparent;
+	color: var(--wp--preset--color--contrast);
+}
+
 /* Respect users who ask for less motion. */
 @media (prefers-reduced-motion: reduce) {
 
