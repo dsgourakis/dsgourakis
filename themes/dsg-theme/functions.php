@@ -30,8 +30,33 @@ add_action( 'wp_enqueue_scripts', 'dsg_theme_enqueue_styles' );
  */
 function dsg_theme_setup() {
 	add_editor_style( 'style.css' );
+
+	// Pages use their excerpt as the intro text under the title (see templates/page.html).
+	add_post_type_support( 'page', 'excerpt' );
 }
 add_action( 'after_setup_theme', 'dsg_theme_setup' );
+
+/**
+ * On pages, show the Excerpt block only when an excerpt was written.
+ *
+ * Without this, WordPress makes one up from the first words of the page
+ * content, and the intro would repeat the text right below it.
+ *
+ * @param string   $block_content The block's HTML.
+ * @param array    $block         The block's data.
+ * @param WP_Block $instance      The block instance, which knows which post it's showing.
+ * @return string
+ */
+function dsg_theme_page_excerpt_only_if_written( $block_content, $block, $instance ) {
+	$post_id = $instance->context['postId'] ?? 0;
+
+	if ( $post_id && 'page' === get_post_type( $post_id ) && ! has_excerpt( $post_id ) ) {
+		return '';
+	}
+
+	return $block_content;
+}
+add_filter( 'render_block_core/post-excerpt', 'dsg_theme_page_excerpt_only_if_written', 10, 3 );
 
 /**
  * Preload the main font, so the hero heading doesn't flash in the fallback.
