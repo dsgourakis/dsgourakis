@@ -31,6 +31,10 @@ class Test_Project_Post_Type extends WP_UnitTestCase {
 		$this->assertSame( 'portfolio', $post_type->rewrite['slug'] );
 	}
 
+	public function test_projects_have_an_order_field() {
+		$this->assertTrue( post_type_supports( Project::POST_TYPE, 'page-attributes' ), 'The Project Grid sorts by the "Order" field.' );
+	}
+
 	public function test_taxonomy_is_attached_to_projects() {
 		$this->assertTrue( taxonomy_exists( Project::TAXONOMY ) );
 		$this->assertContains( Project::TAXONOMY, get_object_taxonomies( Project::POST_TYPE ) );

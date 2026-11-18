@@ -2,7 +2,20 @@
  * Styles for the editor AND the frontend.
  * Colors, fonts and spacing come from theme.json presets (CSS custom
  * properties), so the card follows the theme and its style variations.
+ *
+ * Layout rules, CSS only (no settings):
+ * - Cards are numbered automatically above the title: 01, 02, 03…
+ * - The FIRST card in its container is featured: full row, text left,
+ *   image right, "Read case study" shown.
+ *
+ * For the design's "1 full row + 2 halves", put all the cards in ONE
+ * Group with a Grid layout (2 columns). The first card spans both columns.
  */
+
+// Every container holding project cards starts its own count.
+:has(> .wp-block-dsg-project-card) {
+	counter-reset: dsg-project;
+}
 
 .wp-block-dsg-project-card {
 	// Needed for the full-card click area on the title link.
@@ -15,6 +28,7 @@
 	border-radius: var(--wp--custom--radius--card, 20px);
 	background-color: var(--wp--preset--color--surface, transparent);
 	color: var(--wp--preset--color--contrast, inherit);
+	counter-increment: dsg-project;
 
 	&__media img {
 		display: block;
@@ -36,6 +50,18 @@
 		font-size: var(--wp--preset--font-size--x-large, 1.625rem);
 		font-weight: 800;
 		letter-spacing: var(--wp--custom--letter-spacing--tight, -0.02em);
+
+		// The counter. `/ ""` is its alt text: empty, so screen readers skip it.
+		&::before {
+			content: counter(dsg-project, decimal-leading-zero) / "";
+			display: block;
+			margin-bottom: 0.875rem;
+			font-family: var(--wp--preset--font-family--mono, monospace);
+			font-size: var(--wp--preset--font-size--x-small, 0.8125rem);
+			font-weight: 400;
+			letter-spacing: 0;
+			color: var(--wp--preset--color--accent, currentcolor);
+		}
 
 		a {
 			color: inherit;
@@ -79,9 +105,59 @@
 		}
 	}
 
+	// Only shown on the featured card (see below).
+	&__cta {
+		display: none;
+		font-family: var(--wp--preset--font-family--mono, monospace);
+		font-size: var(--wp--preset--font-size--x-small, 0.8125rem);
+		letter-spacing: var(--wp--custom--letter-spacing--label, 0.12em);
+		text-transform: uppercase;
+	}
+
 	// Visible focus for keyboard users, on the whole card.
 	&:focus-within {
 		outline: 3px solid var(--wp--preset--color--accent, #5b8cff);
 		outline-offset: 3px;
+	}
+
+	// Featured: the first card in its container.
+	&:first-child {
+		flex-direction: row;
+		flex-wrap: wrap;
+		gap: 2rem;
+		padding: var(--wp--preset--spacing--60, clamp(1.5rem, 4vw, 3rem));
+
+		// Full row when the container is a grid.
+		grid-column: 1 / -1;
+
+		// Image on the right; it wraps under the text on narrow screens.
+		.wp-block-dsg-project-card__media {
+			order: 2;
+			flex: 999 1 460px;
+			min-width: 0;
+		}
+
+		.wp-block-dsg-project-card__body {
+			flex: 1 1 340px;
+			justify-content: center;
+			gap: 1rem;
+		}
+
+		.wp-block-dsg-project-card__title {
+			font-size: var(--wp--preset--font-size--xx-large, 2.125rem);
+			line-height: 1.1;
+
+			&::before {
+				content: counter(dsg-project, decimal-leading-zero) " — featured" / "";
+			}
+		}
+
+		.wp-block-dsg-project-card__summary {
+			font-size: var(--wp--preset--font-size--medium, 1.0625rem);
+		}
+
+		.wp-block-dsg-project-card__cta {
+			display: block;
+		}
 	}
 }

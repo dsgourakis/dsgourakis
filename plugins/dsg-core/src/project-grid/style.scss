@@ -1,0 +1,23 @@
+/**
+ * Editor + frontend styles.
+ *
+ * The grid only places the cards; each Project Card styles itself
+ * (see project-card/style.scss). The first card spans the full row
+ * on its own (grid-column: 1 / -1), the rest sit two per row.
+ */
+
+.wp-block-dsg-project-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--wp--preset--spacing--30, 1rem);
+
+	// One column on tablets and phones (WordPress's own breakpoint).
+	@media (max-width: 781px) {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	// Editor only: the loading / empty placeholder spans the whole grid.
+	> .components-placeholder {
+		grid-column: 1 / -1;
+	}
+}

@@ -54,6 +54,14 @@
 		</properties>
 	</rule>
 
+	<!--
+		A block's render.php is included inside a WordPress function, so its
+		variables are local, not global, and don't need the prefix.
+	-->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound">
+		<exclude-pattern>*/render.php</exclude-pattern>
+	</rule>
+
 	<!-- Test method names describe themselves, so they don't need a docblock each. -->
 	<rule ref="Squiz.Commenting.FunctionComment.Missing">
 		<exclude-pattern>*/tests/*</exclude-pattern>

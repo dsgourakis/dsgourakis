@@ -46,7 +46,8 @@ class Project {
 				'rewrite'      => array( 'slug' => 'portfolio' ),
 				'menu_icon'    => 'dashicons-portfolio',
 				'show_in_rest' => true, // Required for the block editor.
-				'supports'     => array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields' ),
+				// page-attributes adds the "Order" field, used to sort the Project Grid.
+				'supports'     => array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'page-attributes' ),
 			)
 		);
 	}

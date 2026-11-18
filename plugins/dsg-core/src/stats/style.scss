@@ -1,0 +1,17 @@
+/**
+ * Editor + frontend styles.
+ *
+ * The container owns the layout; each Stat only styles itself.
+ */
+
+.wp-block-dsg-stats {
+	display: grid;
+
+	// As many columns as fit, each at least 260px wide; they stack on phones.
+	// min(…, 100%) stops a single column overflowing on very small screens.
+	grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+	gap: var(--wp--preset--spacing--30, 1rem);
+
+	// The Stats inside are numbered 01, 02, 03 (see stat/style.scss).
+	counter-reset: dsg-stat;
+}

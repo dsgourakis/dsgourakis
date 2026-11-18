@@ -4,7 +4,7 @@
  * React concepts used here:
  * - props: WordPress passes `attributes` (the saved data) and `setAttributes` (to change it).
  * - state: `technologiesText` keeps what the user is typing until they leave the field.
- * - components: RichText, MediaUpload, InspectorControls are React components from WordPress.
+ * - components: RichText, InspectorControls and our own ImagePicker are React components.
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
@@ -12,16 +12,14 @@ import {
 	useBlockProps,
 	RichText,
 	InspectorControls,
-	MediaUpload,
-	MediaUploadCheck,
 } from '@wordpress/block-editor';
-import { PanelBody, TextControl, Button, Flex } from '@wordpress/components';
+import { PanelBody, TextControl, Flex } from '@wordpress/components';
 
+import ImagePicker from '../shared/image-picker';
 import { parseTechnologies, formatTechnologies } from './utils';
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { title, summary, url, imageId, imageUrl, imageAlt, technologies } =
-		attributes;
+	const { title, summary, url, imageAlt, technologies } = attributes;
 
 	// Local state: the raw text in the "Technologies" field while typing.
 	const [ technologiesText, setTechnologiesText ] = useState(
@@ -31,18 +29,6 @@ export default function Edit( { attributes, setAttributes } ) {
 	const blockProps = useBlockProps( {
 		className: 'wp-block-dsg-project-card',
 	} );
-
-	const onSelectImage = ( media ) => {
-		setAttributes( {
-			imageId: media.id,
-			imageUrl: media.sizes?.large?.url ?? media.url,
-			imageAlt: media.alt ?? '',
-		} );
-	};
-
-	const onRemoveImage = () => {
-		setAttributes( { imageId: undefined, imageUrl: '', imageAlt: '' } );
-	};
 
 	return (
 		<>
@@ -99,53 +85,11 @@ export default function Edit( { attributes, setAttributes } ) {
 			</InspectorControls>
 
 			<article { ...blockProps }>
-				<MediaUploadCheck>
-					<MediaUpload
-						onSelect={ onSelectImage }
-						allowedTypes={ [ 'image' ] }
-						value={ imageId }
-						render={ ( { open } ) => (
-							<div className="wp-block-dsg-project-card__media">
-								{ imageUrl ? (
-									<>
-										<img
-											src={ imageUrl }
-											alt={ imageAlt }
-										/>
-										<div className="wp-block-dsg-project-card__media-actions">
-											<Button
-												variant="secondary"
-												onClick={ open }
-											>
-												{ __(
-													'Replace image',
-													'dsg-core'
-												) }
-											</Button>
-											<Button
-												variant="tertiary"
-												isDestructive
-												onClick={ onRemoveImage }
-											>
-												{ __( 'Remove', 'dsg-core' ) }
-											</Button>
-										</div>
-									</>
-								) : (
-									<Button
-										variant="secondary"
-										onClick={ open }
-									>
-										{ __(
-											'Add project image',
-											'dsg-core'
-										) }
-									</Button>
-								) }
-							</div>
-						) }
-					/>
-				</MediaUploadCheck>
+				<ImagePicker
+					className="wp-block-dsg-project-card__media"
+					attributes={ attributes }
+					setAttributes={ setAttributes }
+				/>
 
 				<div className="wp-block-dsg-project-card__body">
 					<h3 className="wp-block-dsg-project-card__title">
@@ -180,6 +124,15 @@ export default function Edit( { attributes, setAttributes } ) {
 								<li key={ name }>{ name }</li>
 							) ) }
 						</ul>
+					) }
+
+					{ url && (
+						<span
+							className="wp-block-dsg-project-card__cta"
+							aria-hidden="true"
+						>
+							{ __( 'Read case study', 'dsg-core' ) } →
+						</span>
 					) }
 				</div>
 			</article>
