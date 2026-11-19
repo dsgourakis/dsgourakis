@@ -18,6 +18,17 @@ Text Domain: dsg-theme
  * theme.json cannot express yet.
  */
 
+/*
+ * No automatic gap between the header, <main> and the footer.
+ *
+ * theme.json's root blockGap also adds a top margin to each of these. Keep
+ * blockGap for spacing inside blocks; each part sets its own padding instead.
+ * Core's rule uses :where(), so this plain selector wins.
+ */
+.wp-site-blocks > * {
+	margin-block-start: 0;
+}
+
 /* Visible focus outline for keyboard users on every interactive element. */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
 	outline: 3px solid var(--wp--preset--color--accent);
