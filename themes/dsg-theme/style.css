@@ -175,6 +175,56 @@ Text Domain: dsg-theme
 	}
 }
 
+/*
+ * Light/dark toggle (parts/header.html, assets/js/color-scheme.js).
+ * Dark is the default; the light palette is swapped in by functions.php
+ * when <html> has data-theme="light".
+ */
+
+/* Scrollbars and form controls follow the scheme too. */
+:root {
+	color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+	color-scheme: light;
+}
+
+.color-scheme-toggle {
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	width: 2.75rem;
+	height: 2.75rem;
+	padding: 0;
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: var(--wp--custom--radius--pill);
+	background-color: var(--wp--preset--color--surface);
+	color: var(--wp--preset--color--contrast);
+	cursor: pointer;
+}
+
+.color-scheme-toggle:hover {
+	border-color: var(--wp--preset--color--accent);
+	color: var(--wp--preset--color--accent);
+}
+
+/* Shown by the script; without JavaScript it would do nothing. */
+.color-scheme-toggle[hidden] {
+	display: none;
+}
+
+/* The icon shows the scheme a click switches to. */
+.color-scheme-toggle__moon,
+:root[data-theme="light"] .color-scheme-toggle__sun {
+	display: none;
+}
+
+:root[data-theme="light"] .color-scheme-toggle__moon {
+	display: block;
+}
+
 /* The mobile menu overlay lists the links plainly; no pill there. */
 .dsg-pill-nav .is-menu-open .dsg-nav-pill {
 	display: none;

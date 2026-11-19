@@ -32,10 +32,6 @@
 			width: 100%;
 			padding: 0.875rem 0;
 			border: 0;
-
-			// The theme's "border" color is too faint for a field's only
-			// edge (WCAG 1.4.11 asks for 3:1). Muted text at 70% gives
-			// about 3.9:1 on the dark surface and 3.3:1 on the light one.
 			border-bottom: 1.5px solid var(--wp--preset--color--muted, currentcolor);
 			border-bottom-color: color-mix(in srgb, var(--wp--preset--color--muted, currentcolor) 70%, transparent);
 			border-radius: 0;
@@ -43,7 +39,7 @@
 			color: var(--wp--preset--color--contrast, inherit);
 			font-family: var(--wp--preset--font-family--sans, inherit);
 			font-size: 1rem;
-			line-height: 1.5;
+			// line-height: 1.5;
 			resize: vertical; // Textarea only; inputs ignore it.
 			transition: border-color 0.2s, box-shadow 0.2s;
 

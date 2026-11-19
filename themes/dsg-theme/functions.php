@@ -96,3 +96,80 @@ function dsg_theme_register_block_styles() {
 	);
 }
 add_action( 'init', 'dsg_theme_register_block_styles' );
+
+/*
+ * Light/dark toggle.
+ *
+ * Visitors get their system setting (prefers-color-scheme) until they pick
+ * one with the toggle; that choice is saved in localStorage and wins from
+ * then on. Dark is the fallback: theme.json holds the dark palette. In light,
+ * <html> gets data-theme="light" and the light palette from
+ * styles/light.json is swapped in as CSS variables. The button is in parts/header.html and its script in
+ * assets/js/color-scheme.js.
+ */
+
+/**
+ * Key the choice is saved under. The script module uses the same one.
+ */
+const DSG_THEME_SCHEME_KEY = 'dsg-color-scheme';
+
+/**
+ * Pick the scheme before anything is painted: the saved choice if there is
+ * one, otherwise the system setting.
+ *
+ * Inline and first in <head>, so a visitor in light mode doesn't see a
+ * flash of dark on every page load.
+ *
+ * @return void
+ */
+function dsg_theme_print_color_scheme_script() {
+	wp_print_inline_script_tag(
+		sprintf(
+			'try{var s=localStorage.getItem(%s)}catch(e){}if(s==="light"||(s!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches))document.documentElement.dataset.theme="light"',
+			wp_json_encode( DSG_THEME_SCHEME_KEY )
+		)
+	);
+}
+add_action( 'wp_head', 'dsg_theme_print_color_scheme_script', 1 );
+
+/**
+ * CSS that swaps in the light palette when data-theme="light" is set.
+ *
+ * Built from styles/light.json, so the light colors are defined in one
+ * place (the same file the Site Editor offers as the "Light" style).
+ * `:root[data-theme]` is more specific than the `:root` WordPress prints
+ * the dark palette on, so it wins regardless of load order.
+ *
+ * @return string
+ */
+function dsg_theme_light_scheme_css() {
+	$light   = wp_json_file_decode( get_theme_file_path( 'styles/light.json' ), array( 'associative' => true ) );
+	$palette = $light['settings']['color']['palette'] ?? array();
+
+	$vars = '';
+	foreach ( $palette as $color ) {
+		$vars .= sprintf( '--wp--preset--color--%s:%s;', sanitize_key( $color['slug'] ), $color['color'] );
+	}
+
+	return ':root[data-theme="light"]{' . $vars . '}';
+}
+
+/**
+ * Load the light palette and the toggle's script on the frontend.
+ *
+ * The script is a module so it keeps working with client-side navigation
+ * (see docs/header-and-navigation.md).
+ *
+ * @return void
+ */
+function dsg_theme_enqueue_color_scheme() {
+	wp_add_inline_style( 'dsg-theme', dsg_theme_light_scheme_css() );
+
+	wp_enqueue_script_module(
+		'dsg-theme/color-scheme',
+		get_theme_file_uri( 'assets/js/color-scheme.js' ),
+		array(),
+		wp_get_theme()->get( 'Version' )
+	);
+}
+add_action( 'wp_enqueue_scripts', 'dsg_theme_enqueue_color_scheme' );

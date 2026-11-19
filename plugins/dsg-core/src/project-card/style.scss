@@ -135,10 +135,14 @@
 			order: 2;
 			flex: 999 1 460px;
 			min-width: 0;
+
+			img {
+				aspect-ratio: 16 / 6;
+			}
 		}
 
 		.wp-block-dsg-project-card__body {
-			flex: 1 1 340px;
+			flex: 1 1 400px;
 			justify-content: center;
 			gap: 1rem;
 		}
