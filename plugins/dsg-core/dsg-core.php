@@ -4,7 +4,7 @@
  * Plugin URI:        https://www.dsgourakis.com
  * Description:       Custom post types, blocks and site functionality for dsgourakis.com.
  * Version:           0.1.0
- * Requires at least: 6.6
+ * Requires at least: 6.8
  * Requires PHP:      8.2
  * Author:            Dimitris Sgourakis
  * Author URI:        https://www.dsgourakis.com

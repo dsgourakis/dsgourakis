@@ -8,6 +8,11 @@
 namespace DSG\Core;
 
 use DSG\Core\Blocks\Blocks;
+use DSG\Core\Blocks\Copyright;
+use DSG\Core\Contact\ContactEndpoint;
+use DSG\Core\Contact\FallbackHandler;
+use DSG\Core\Contact\Mail;
+use DSG\Core\Contact\Messages;
 use DSG\Core\Navigation\ClientNavigation;
 use DSG\Core\PostTypes\Project;
 use DSG\Core\Settings\ResumeLink;
@@ -56,7 +61,12 @@ final class Plugin {
 
 		( new Project() )->register_hooks();
 		( new Blocks() )->register_hooks();
+		( new Copyright() )->register_hooks();
 		( new ClientNavigation() )->register_hooks();
 		( new ResumeLink() )->register_hooks();
+		( new Messages() )->register_hooks();
+		( new Mail() )->register_hooks();
+		( new ContactEndpoint() )->register_hooks();
+		( new FallbackHandler() )->register_hooks();
 	}
 }

@@ -24,7 +24,7 @@ class Test_Blocks extends WP_UnitTestCase {
 	public function test_blocks_are_registered() {
 		$registry = WP_Block_Type_Registry::get_instance();
 
-		foreach ( array( 'dsg/hero', 'dsg/project-card', 'dsg/project-grid', 'dsg/section-header', 'dsg/stat', 'dsg/stats', 'dsg/tech-stack' ) as $name ) {
+		foreach ( array( 'dsg/contact-form', 'dsg/hero', 'dsg/project-card', 'dsg/project-grid', 'dsg/section-header', 'dsg/stat', 'dsg/stats', 'dsg/tech-stack' ) as $name ) {
 			$this->assertTrue( $registry->is_registered( $name ), "$name is not registered. Did you run \"npm run build\"?" );
 		}
 	}

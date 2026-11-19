@@ -127,7 +127,7 @@ Text Domain: dsg-theme
 	.dsg-pill-nav .wp-block-navigation-item__content {
 		position: relative;
 		min-width: 5.25rem;
-		padding: 0.6875rem 1rem;
+		padding: 0.6875rem 0;
 		border-radius: var(--wp--custom--radius--pill);
 		text-align: center;
 	}
@@ -192,4 +192,77 @@ main.is-entering {
 		transition-duration: 0.01ms !important;
 		scroll-behavior: auto !important;
 	}
+}
+
+/*
+ * Footer: the contact card and the copyright bar (parts/footer.html).
+ * The form itself is the dsg/contact-form block, styled by the plugin.
+ */
+
+.site-footer {
+	padding-top: var(--wp--preset--spacing--70);
+	padding-bottom: var(--wp--preset--spacing--50);
+}
+
+/* The card: intro on the left, the form on the right; stacks when narrow. */
+.site-footer__contact {
+	gap: clamp(2rem, 5vw, 3rem);
+	padding: clamp(1.75rem, 5vw, 4rem);
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: var(--wp--custom--radius--panel);
+	background: var(--wp--preset--color--surface);
+}
+
+.site-footer__intro {
+	flex: 1 1 21.25rem;
+	gap: 1.125rem;
+}
+
+.site-footer__intro > * {
+	margin: 0;
+}
+
+.site-footer__intro h2 {
+	font-weight: 800;
+	letter-spacing: var(--wp--custom--letter-spacing--tightest);
+	line-height: 1;
+}
+
+/* The text color format saves a <mark>; drop the browser's yellow. */
+.site-footer__intro mark {
+	background: none;
+}
+
+.site-footer__label,
+.site-footer__bar {
+	font-family: var(--wp--preset--font-family--mono);
+	font-size: var(--wp--preset--font-size--x-small);
+	color: var(--wp--preset--color--muted);
+}
+
+.site-footer__email {
+	font-family: var(--wp--preset--font-family--mono);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.site-footer__form {
+	flex: 1 1 26.25rem;
+	min-width: 0;
+}
+
+.site-footer__bar {
+	padding-top: var(--wp--preset--spacing--40);
+}
+
+.site-footer__bar p {
+	margin: 0;
+}
+
+/*
+ * Decoration, like the hero's code tags.
+ * `/ ""` hides it from screen readers.
+ */
+.site-footer__bar::before {
+	content: "</body>" / "";
+	opacity: 0.6;
 }

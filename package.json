@@ -8,8 +8,8 @@
 		"node": ">=20"
 	},
 	"scripts": {
-		"start": "wp-scripts start --webpack-src-dir=plugins/dsg-core/src --output-path=plugins/dsg-core/build --webpack-copy-php",
-		"build": "wp-scripts build --webpack-src-dir=plugins/dsg-core/src --output-path=plugins/dsg-core/build --webpack-copy-php",
+		"start": "wp-scripts start --webpack-src-dir=plugins/dsg-core/src --output-path=plugins/dsg-core/build --webpack-copy-php --experimental-modules",
+		"build": "wp-scripts build --webpack-src-dir=plugins/dsg-core/src --output-path=plugins/dsg-core/build --webpack-copy-php --experimental-modules",
 		"lint:js": "wp-scripts lint-js plugins/dsg-core/src plugins/dsg-core/assets",
 		"lint:css": "wp-scripts lint-style \"plugins/dsg-core/src/**/*.scss\" \"themes/dsg-theme/**/*.css\"",
 		"lint:php": "composer lint",

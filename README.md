@@ -31,6 +31,13 @@ The plugin needs Composer's autoloader. If you have PHP and Composer installed, 
 npx wp-env run cli --env-cwd=wp-content/dsg-repo composer install
 ```
 
+### Working on the blocks
+
+Use two terminals:
+
+1. `npm run env:start`, which finishes and hands the terminal back while the site keeps running.
+2. `npm run start`, which you leave open while you edit blocks. Stop it with Ctrl+C.
+
 ### Useful commands
 
 | Command | What it does |
