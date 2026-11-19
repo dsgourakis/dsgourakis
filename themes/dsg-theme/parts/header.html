@@ -1,9 +1,29 @@
-<!-- wp:group {"tagName":"header","align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}},"layout":{"type":"constrained"}} -->
-<header class="wp-block-group alignfull" style="padding-top:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--40)">
+<!-- wp:group {"tagName":"header","align":"full","className":"site-header","style":{"spacing":{"padding":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}},"layout":{"type":"constrained"}} -->
+<header class="wp-block-group alignfull site-header" style="padding-top:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--40)">
 	<!-- wp:group {"align":"wide","layout":{"type":"flex","justifyContent":"space-between","flexWrap":"wrap"}} -->
 	<div class="wp-block-group alignwide">
-		<!-- wp:site-title {"level":0} /-->
-		<!-- wp:navigation {"overlayMenu":"mobile","layout":{"type":"flex","justifyContent":"right"}} /-->
+		<!-- wp:html -->
+		<a class="site-logo" href="/" rel="home" aria-label="Dimitris Sgourakis, home">D<span class="site-logo__dot">.</span>S</a>
+		<!-- /wp:html -->
+
+		<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+		<div class="wp-block-group">
+			<!-- wp:navigation {"className":"dsg-pill-nav","overlayMenu":"mobile","overlayBackgroundColor":"base","overlayTextColor":"contrast","layout":{"type":"flex","justifyContent":"right"}} -->
+				<!-- wp:navigation-link {"label":"Home","url":"/","kind":"custom","isTopLevelLink":true} /-->
+				<!-- wp:navigation-link {"label":"Work","url":"/portfolio/","kind":"custom","isTopLevelLink":true} /-->
+				<!-- wp:navigation-link {"label":"About","url":"/about/","kind":"custom","isTopLevelLink":true} /-->
+				<!-- wp:navigation-link {"label":"Contact","url":"/contact/","kind":"custom","isTopLevelLink":true} /-->
+			<!-- /wp:navigation -->
+
+			<!-- wp:buttons {"className":"site-header__cta"} -->
+			<div class="wp-block-buttons site-header__cta">
+				<!-- wp:button {"metadata":{"bindings":{"url":{"source":"dsg-core/resume"}}}} -->
+				<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" target="_blank" rel="noreferrer noopener">Résumé <span aria-hidden="true">↗</span><span class="screen-reader-text"> (PDF, opens in a new tab)</span></a></div>
+				<!-- /wp:button -->
+			</div>
+			<!-- /wp:buttons -->
+		</div>
+		<!-- /wp:group -->
 	</div>
 	<!-- /wp:group -->
 </header>

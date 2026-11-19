@@ -8,7 +8,9 @@
 namespace DSG\Core;
 
 use DSG\Core\Blocks\Blocks;
+use DSG\Core\Navigation\ClientNavigation;
 use DSG\Core\PostTypes\Project;
+use DSG\Core\Settings\ResumeLink;
 
 /**
  * Boots the plugin. Each feature lives in its own class and registers its own hooks.
@@ -54,5 +56,7 @@ final class Plugin {
 
 		( new Project() )->register_hooks();
 		( new Blocks() )->register_hooks();
+		( new ClientNavigation() )->register_hooks();
+		( new ResumeLink() )->register_hooks();
 	}
 }

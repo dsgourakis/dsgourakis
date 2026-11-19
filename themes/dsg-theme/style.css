@@ -24,6 +24,17 @@ Text Domain: dsg-theme
 	outline-offset: 3px;
 }
 
+/* Header Résumé button: rounded and filled, in the normal font. */
+.site-header__cta .wp-block-button > .wp-block-button__link {
+	padding: 0.75rem 1.25rem;
+	border-radius: var(--wp--custom--radius--pill);
+	font-family: var(--wp--preset--font-family--sans);
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 500;
+	letter-spacing: normal;
+	text-transform: none;
+}
+
 /*
  * Button styles. Here rather than theme.json because they need hover
  * states, and core's own outline CSS would otherwise win on hover.
@@ -71,6 +82,104 @@ Text Domain: dsg-theme
 /* Leave a little space above a section when a link scrolls to it. */
 [id] {
 	scroll-margin-top: var(--wp--preset--spacing--50);
+}
+
+/*
+ * Header: "D.S" logo, the pill menu and the Résumé button (parts/header.html).
+ */
+
+.site-logo {
+	font-size: var(--wp--preset--font-size--large);
+	font-weight: 900;
+	letter-spacing: var(--wp--custom--letter-spacing--tighter);
+	text-decoration: none;
+}
+
+.site-logo__dot {
+	color: var(--wp--preset--color--accent);
+}
+
+/*
+ * Pill menu. On screens where the links are shown inline (600px and up,
+ * when the mobile menu takes over), the links sit in a rounded bar and a
+ * highlight slides under the current one.
+ *
+ * The highlight (.dsg-nav-pill) is printed and positioned by the dsg-core
+ * plugin (assets/client-navigation/), which passes its place and size as
+ * --pill-x/y/w/h. Without JavaScript, the current link gets its own
+ * background instead.
+ */
+@media (min-width: 600px) {
+
+	.dsg-pill-nav .wp-block-navigation__responsive-container-content {
+		position: relative;
+		padding: 0.25rem;
+		background-color: var(--wp--preset--color--surface);
+		border: 1px solid var(--wp--preset--color--border);
+		border-radius: var(--wp--custom--radius--pill);
+	}
+
+	.dsg-pill-nav .wp-block-navigation__container {
+		gap: 0;
+	}
+
+	/* position: relative paints the link text above the highlight. */
+	.dsg-pill-nav .wp-block-navigation-item__content {
+		position: relative;
+		min-width: 5.25rem;
+		padding: 0.6875rem 1rem;
+		border-radius: var(--wp--custom--radius--pill);
+		text-align: center;
+	}
+
+	/* No JavaScript: the current link carries the highlight itself. */
+	.dsg-pill-nav .current-menu-item > .wp-block-navigation-item__content {
+		background-color: var(--wp--preset--color--border);
+	}
+
+	.dsg-nav-pill.is-visible ~ ul .current-menu-item > a {
+		background-color: transparent;
+	}
+
+	.dsg-nav-pill {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: var(--pill-w, 0);
+		height: var(--pill-h, 0);
+		border-radius: var(--wp--custom--radius--pill);
+		background-color: var(--wp--preset--color--border);
+		opacity: 0;
+		transform: translate(var(--pill-x, 0), var(--pill-y, 0));
+	}
+
+	.dsg-nav-pill.is-visible {
+		opacity: 1;
+	}
+
+	.dsg-nav-pill.is-animated {
+		transition:
+			transform 0.38s var(--wp--custom--easing),
+			width 0.38s var(--wp--custom--easing);
+	}
+}
+
+/* The mobile menu overlay lists the links plainly; no pill there. */
+.dsg-pill-nav .is-menu-open .dsg-nav-pill {
+	display: none;
+}
+
+/* New page content fades up after a client-side page change. */
+main.is-entering {
+	animation: dsg-page-enter 0.4s var(--wp--custom--easing) both;
+}
+
+@keyframes dsg-page-enter {
+
+	from {
+		opacity: 0;
+		transform: translateY(0.5rem);
+	}
 }
 
 /* Respect users who ask for less motion. */
