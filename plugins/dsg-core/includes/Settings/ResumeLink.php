@@ -12,12 +12,10 @@ use WP_Block;
 /**
  * Stores which PDF is the résumé, and feeds its URL to blocks.
  *
- * - Setting: Settings > General > Résumé. It stores the PDF's attachment ID,
- *   so uploading a new résumé is just picking another file.
- * - Block binding: a Button bound to the "dsg-core/resume" source gets the
- *   PDF's URL as its link. The header does this (parts/header.html).
- * - With no résumé set, bound buttons are not shown at all, rather than
- *   linking nowhere.
+ * - Setting: Settings > General > Résumé.
+ * - Permanent URL: /cv.pdf always serves the chosen PDF.
+ * - Block binding: a Button bound to the "dsg-core/resume" source gets
+ *   /cv.pdf as its link.
  */
 class ResumeLink {
 
@@ -32,11 +30,23 @@ class ResumeLink {
 	public const SOURCE = 'dsg-core/resume';
 
 	/**
+	 * The permanent path, relative to the site's home URL.
+	 */
+	public const PATH = 'cv.pdf';
+
+	/**
+	 * How long browsers and CDNs may reuse the PDF without asking again.
+	 * Short, so a new version shows up within the hour.
+	 */
+	private const MAX_AGE = HOUR_IN_SECONDS;
+
+	/**
 	 * Hook into WordPress.
 	 *
 	 * @return void
 	 */
 	public function register_hooks(): void {
+		add_action( 'parse_request', array( $this, 'serve' ) );
 		add_action( 'init', array( $this, 'register_setting' ) );
 		add_action( 'init', array( $this, 'register_binding_source' ) );
 		add_action( 'admin_init', array( $this, 'add_settings_field' ) );
@@ -130,6 +140,12 @@ class ResumeLink {
 			esc_url( admin_url( 'media-new.php' ) ),
 			esc_html__( 'upload it to the Media Library first.', 'dsg-core' )
 		);
+
+		printf(
+			'<p class="description">%s <code>%s</code></p>',
+			esc_html__( 'Permanent link, always the selected PDF:', 'dsg-core' ),
+			esc_html( home_url( '/' . self::PATH ) )
+		);
 	}
 
 	/**
@@ -145,7 +161,7 @@ class ResumeLink {
 	}
 
 	/**
-	 * The résumé's URL, or null when none is set or the file is gone.
+	 * The résumé's permanent URL (/cv.pdf), or null when none is set or the file is gone.
 	 *
 	 * Also the bindings callback, which is why it returns null rather than "":
 	 * null tells WordPress to leave the block's own value alone.
@@ -153,6 +169,15 @@ class ResumeLink {
 	 * @return string|null
 	 */
 	public static function url(): ?string {
+		return self::attachment_url() ? home_url( '/' . self::PATH ) : null;
+	}
+
+	/**
+	 * The current PDF's real Media Library URL, or null.
+	 *
+	 * @return string|null
+	 */
+	public static function attachment_url(): ?string {
 		$id = (int) get_option( self::OPTION, 0 );
 		if ( ! $id ) {
 			return null;
@@ -161,6 +186,57 @@ class ResumeLink {
 		$url = wp_get_attachment_url( $id );
 
 		return $url ? $url : null;
+	}
+
+	/**
+	 * Answer requests for /cv.pdf with the current résumé.
+	 *
+	 * Runs on "parse_request": WordPress has worked out the requested path
+	 * but hasn't queried posts yet. No rewrite rule needed, so nothing to
+	 * flush. Any other path, or no résumé set, falls through untouched.
+	 *
+	 * @param \WP $wp The current request.
+	 * @return void
+	 */
+	public function serve( \WP $wp ): void {
+		if ( self::PATH !== $wp->request || ! self::attachment_url() ) {
+			return;
+		}
+
+		$file = get_attached_file( (int) get_option( self::OPTION ) );
+
+		// The file isn't on this server (e.g. media offloaded to a CDN): redirect.
+		// 302, temporary, so search engines keep /cv.pdf as the address.
+		if ( ! $file || ! is_readable( $file ) ) {
+			wp_redirect( self::attachment_url(), 302 ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- our own upload URL.
+			exit;
+		}
+
+		$modified = (int) filemtime( $file );
+
+		header( 'Content-Type: application/pdf' );
+		// "inline" opens it in the browser; the filename is used if the visitor saves it.
+		header( sprintf( 'Content-Disposition: inline; filename="%s"', basename( $file ) ) );
+		header( sprintf( 'Link: <%s>; rel="canonical"', self::url() ) );
+		header( 'Cache-Control: public, max-age=' . self::MAX_AGE );
+		header( 'Last-Modified: ' . gmdate( 'D, d M Y H:i:s', $modified ) . ' GMT' );
+
+		// The browser already has this version: answer "not modified", send no file.
+		$since = isset( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ? strtotime( sanitize_text_field( wp_unslash( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) ) : false;
+		if ( $since && $since >= $modified ) {
+			status_header( 304 );
+			exit;
+		}
+
+		status_header( 200 );
+		header( 'Content-Length: ' . filesize( $file ) );
+
+		// HEAD requests (link checkers, crawlers) only want the headers.
+		$method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_key( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : 'get';
+		if ( 'head' !== $method ) {
+			readfile( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- streaming a PDF.
+		}
+		exit;
 	}
 
 	/**

@@ -131,7 +131,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							className="wp-block-dsg-project-card__cta"
 							aria-hidden="true"
 						>
-							{ __( 'Read case study', 'dsg-core' ) } →
+							{ __( 'View the project', 'dsg-core' ) } →
 						</span>
 					) }
 				</div>

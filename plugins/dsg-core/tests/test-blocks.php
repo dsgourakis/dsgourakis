@@ -34,14 +34,15 @@ class Test_Blocks extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( '<a href="https://example.com">Red Cross</a>', $html );
 		$this->assertStringContainsString( 'A site.', $html );
-		$this->assertStringContainsString( 'Read case study', $html );
+		$this->assertStringContainsString( '<a class="wp-block-dsg-project-card__cta" href="https://example.com">', $html );
+		$this->assertStringContainsString( 'View the project', $html );
 	}
 
 	public function test_project_card_without_link_has_no_link_or_cta() {
 		$html = do_blocks( '<!-- wp:dsg/project-card {"title":"Red Cross"} /-->' );
 
 		$this->assertStringNotContainsString( '<a ', $html );
-		$this->assertStringNotContainsString( 'Read case study', $html );
+		$this->assertStringNotContainsString( 'View the project', $html );
 	}
 
 	public function test_project_card_escapes_unsafe_values() {

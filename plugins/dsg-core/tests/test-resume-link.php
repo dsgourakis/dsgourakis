@@ -49,7 +49,40 @@ class Test_Resume_Link extends WP_UnitTestCase {
 
 		$html = do_blocks( self::MARKUP );
 
-		$this->assertStringContainsString( 'href="' . wp_get_attachment_url( $pdf ) . '"', $html );
+		// The permanent URL, not the Media Library one that changes per upload.
+		$this->assertStringContainsString( 'href="' . home_url( '/cv.pdf' ) . '"', $html );
+		$this->assertStringNotContainsString( wp_get_attachment_url( $pdf ), $html );
+	}
+
+	public function test_url_is_null_without_a_resume() {
+		delete_option( ResumeLink::OPTION );
+
+		$this->assertNull( ResumeLink::url() );
+	}
+
+	/**
+	 * Serving the PDF ends the request (exit), so only the cases that must
+	 * NOT serve it can be tested here: they have to return normally.
+	 */
+	public function test_serve_ignores_other_paths() {
+		$pdf = $this->attachment( 'application/pdf', 'resume.pdf' );
+		update_option( ResumeLink::OPTION, $pdf );
+
+		$wp          = new WP();
+		$wp->request = 'about';
+		( new ResumeLink() )->serve( $wp );
+
+		$this->assertSame( 'about', $wp->request );
+	}
+
+	public function test_serve_falls_through_to_404_without_a_resume() {
+		delete_option( ResumeLink::OPTION );
+
+		$wp          = new WP();
+		$wp->request = ResumeLink::PATH;
+		( new ResumeLink() )->serve( $wp );
+
+		$this->assertSame( ResumeLink::PATH, $wp->request );
 	}
 
 	public function test_bound_button_is_hidden_without_a_resume() {

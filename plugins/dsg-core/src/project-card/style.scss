@@ -6,7 +6,7 @@
  * Layout rules, CSS only (no settings):
  * - Cards are numbered automatically above the title: 01, 02, 03…
  * - The FIRST card in its container is featured: full row, text left,
- *   image right, "Read case study" shown.
+ *   image right, "View the project" shown.
  *
  * For the design's "1 full row + 2 halves", put all the cards in ONE
  * Group with a Grid layout (2 columns). The first card spans both columns.
@@ -29,6 +29,11 @@
 	background-color: var(--wp--preset--color--surface, transparent);
 	color: var(--wp--preset--color--contrast, inherit);
 	counter-increment: dsg-project;
+
+	// The image link: block, so it wraps the image exactly (no gap below).
+	&__media a {
+		display: block;
+	}
 
 	&__media img {
 		display: block;
@@ -66,21 +71,28 @@
 		a {
 			color: inherit;
 			text-decoration: none;
+
+			&:hover,
+			&:focus-visible {
+				text-decoration: underline;
+				text-decoration-thickness: 2px;
+				text-underline-offset: 0.2em;
+			}
 		}
 
 		// Makes the whole card clickable, while only the title is a link.
-		a::after {
-			content: "";
-			position: absolute;
-			inset: 0;
-		}
+		// a::after {
+		// 	content: "";
+		// 	position: absolute;
+		// 	inset: 0;
+		// }
 	}
 
-	&:hover &__title a {
-		text-decoration: underline;
-		text-decoration-thickness: 2px;
-		text-underline-offset: 0.2em;
-	}
+	// &:hover &__title a {
+	// 	text-decoration: underline;
+	// 	text-decoration-thickness: 2px;
+	// 	text-underline-offset: 0.2em;
+	// }
 
 	&__summary {
 		margin: 0;
@@ -112,6 +124,17 @@
 		font-size: var(--wp--preset--font-size--x-small, 0.8125rem);
 		letter-spacing: var(--wp--custom--letter-spacing--label, 0.12em);
 		text-transform: uppercase;
+		// Flex items stretch to full width by default; shrink to the text instead.
+		align-self: flex-start;
+		color: inherit;
+		text-decoration: none;
+
+		&:hover,
+		&:focus-visible {
+			text-decoration: underline;
+			text-decoration-thickness: 2px;
+			text-underline-offset: 0.2em;
+		}
 	}
 
 	// Visible focus for keyboard users, on the whole card.
@@ -137,7 +160,7 @@
 			min-width: 0;
 
 			img {
-				aspect-ratio: 16 / 6;
+				max-height: 400px;
 			}
 		}
 

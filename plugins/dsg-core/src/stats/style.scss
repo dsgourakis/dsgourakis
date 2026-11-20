@@ -10,3 +10,9 @@
 	// The Stats inside are numbered 01, 02, 03 (see stat/style.scss).
 	counter-reset: dsg-stat;
 }
+
+@media (max-width: 781px) {
+	.wp-block-dsg-stats {
+		flex-direction: column;
+	}
+}

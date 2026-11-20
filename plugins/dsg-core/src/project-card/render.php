@@ -12,9 +12,11 @@
  * - $block:      the WP_Block instance
  *
  * Accessibility:
- * - The whole card is one <article>, and only the title is a link.
- *   CSS stretches that link over the card, so there are no repeated links.
- * - "Read case study" is aria-hidden: the title link already says where it goes.
+ * - The whole card is one <article>; the title is the main link.
+ * - The image link repeats the title link, so it's mouse-only:
+ *   tabindex="-1" + aria-hidden keep it out of keyboard and screen reader use.
+ * - "View the project" is a real link; hidden text adds the project title
+ *   so it isn't announced as an ambiguous "View the project" several times.
  *
  * The counter (01, 02…) and the featured layout of the first card come from CSS.
  *
@@ -35,6 +37,9 @@ $wrapper_attributes = get_block_wrapper_attributes();
 <article <?php echo wp_kses_data( $wrapper_attributes ); ?>>
 	<?php if ( $image_id || $image_url ) : ?>
 		<div class="wp-block-dsg-project-card__media">
+			<?php if ( $url ) : ?>
+				<a href="<?php echo esc_url( $url ); ?>" tabindex="-1" aria-hidden="true">
+			<?php endif; ?>
 			<?php
 			if ( $image_id ) {
 				// Outputs srcset/sizes too, so browsers download the right size.
@@ -51,6 +56,9 @@ $wrapper_attributes = get_block_wrapper_attributes();
 				printf( '<img src="%s" alt="%s" loading="lazy" />', esc_url( $image_url ), esc_attr( $image_alt ) );
 			}
 			?>
+			<?php if ( $url ) : ?>
+				</a>
+			<?php endif; ?>
 		</div>
 	<?php endif; ?>
 
@@ -76,7 +84,11 @@ $wrapper_attributes = get_block_wrapper_attributes();
 		<?php endif; ?>
 
 		<?php if ( $url ) : ?>
-			<span class="wp-block-dsg-project-card__cta" aria-hidden="true"><?php esc_html_e( 'Read case study', 'dsg-core' ); ?> →</span>
+			<a class="wp-block-dsg-project-card__cta" href="<?php echo esc_url( $url ); ?>">
+				<?php esc_html_e( 'View the project', 'dsg-core' ); ?>
+				<span class="screen-reader-text">: <?php echo esc_html( wp_strip_all_tags( $card_title ) ); ?></span>
+				<span aria-hidden="true">→</span>
+			</a>
 		<?php endif; ?>
 	</div>
 </article>

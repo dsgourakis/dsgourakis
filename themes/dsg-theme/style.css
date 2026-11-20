@@ -20,12 +20,12 @@ Text Domain: dsg-theme
 
 /*
  * No automatic gap between the header, <main> and the footer.
- *
- * theme.json's root blockGap also adds a top margin to each of these. Keep
- * blockGap for spacing inside blocks; each part sets its own padding instead.
- * Core's rule uses :where(), so this plain selector wins.
  */
 .wp-site-blocks > * {
+	margin-block-start: 0;
+}
+
+:root :is(.is-layout-flow, .is-layout-constrained) > * {
 	margin-block-start: 0;
 }
 
