@@ -87,6 +87,14 @@ class ClientNavigation {
 		if ( $tags->next_tag( 'main' ) ) {
 			$tags->set_attribute( 'data-wp-interactive', 'dsg-core/client-navigation' );
 			$tags->set_attribute( 'data-wp-router-region', 'dsg-core/main' );
+
+			// Lets CSS style the rest of the page per page, e.g. hiding the
+			// footer's contact card on /contact/. <main> is swapped on every
+			// client-side page change, so this stays correct without a reload.
+			$queried = get_queried_object();
+			if ( $queried instanceof \WP_Post && is_page() ) {
+				$tags->set_attribute( 'data-page', $queried->post_name );
+			}
 		}
 
 		return $tags->get_updated_html();

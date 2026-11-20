@@ -13,6 +13,15 @@ use DSG\Core\PostTypes\Project;
  */
 class Test_Project_Post_Type extends WP_UnitTestCase {
 
+	/**
+	 * The test framework unregisters all meta keys after each test, so
+	 * register the Project details again before each one.
+	 */
+	public function set_up() {
+		parent::set_up();
+		( new Project() )->register_meta();
+	}
+
 	public function test_post_type_is_registered() {
 		$this->assertTrue( post_type_exists( Project::POST_TYPE ) );
 	}
@@ -40,6 +49,15 @@ class Test_Project_Post_Type extends WP_UnitTestCase {
 		$this->assertContains( Project::TAXONOMY, get_object_taxonomies( Project::POST_TYPE ) );
 	}
 
+	public function test_technologies_have_no_public_pages() {
+		$taxonomy = get_taxonomy( Project::TAXONOMY );
+
+		$this->assertFalse( $taxonomy->publicly_queryable, 'Technologies are filters only, with no archive pages.' );
+		$this->assertFalse( $taxonomy->rewrite );
+		$this->assertTrue( $taxonomy->show_ui, 'Technologies are still managed in wp-admin.' );
+		$this->assertTrue( $taxonomy->show_in_rest, 'The block editor needs the taxonomy in the REST API.' );
+	}
+
 	public function test_project_can_be_tagged_with_technologies() {
 		// Factories create test content quickly.
 		$project_id = self::factory()->post->create( array( 'post_type' => Project::POST_TYPE ) );
@@ -50,5 +68,89 @@ class Test_Project_Post_Type extends WP_UnitTestCase {
 		sort( $names );
 
 		$this->assertSame( array( 'PHP', 'React' ), $names );
+	}
+
+	public function test_project_details_are_registered_for_the_editor() {
+		$registered = get_registered_meta_keys( 'post', Project::POST_TYPE );
+
+		foreach ( array_keys( Project::META ) as $key ) {
+			$this->assertArrayHasKey( $key, $registered, "$key is not registered." );
+			$this->assertTrue( (bool) $registered[ $key ]['show_in_rest'], "$key must be in the REST API for the editor." );
+		}
+	}
+
+	public function test_project_details_are_sanitized() {
+		$project_id = self::factory()->post->create( array( 'post_type' => Project::POST_TYPE ) );
+
+		update_post_meta( $project_id, 'dsg_client', '<b>Red Cross</b>' );
+		update_post_meta( $project_id, 'dsg_live_url', 'javascript:alert(1)' );
+
+		$this->assertSame( 'Red Cross', get_post_meta( $project_id, 'dsg_client', true ) );
+		$this->assertSame( '', get_post_meta( $project_id, 'dsg_live_url', true ) );
+	}
+
+	public function test_only_editors_can_change_project_details_over_rest() {
+		$project_id = self::factory()->post->create( array( 'post_type' => Project::POST_TYPE ) );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
+		$this->assertFalse( current_user_can( 'edit_post_meta', $project_id, 'dsg_client' ) );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+		$this->assertTrue( current_user_can( 'edit_post_meta', $project_id, 'dsg_client' ) );
+	}
+
+	public function test_next_after_follows_the_order_field_and_wraps_round() {
+		$first  = self::factory()->post->create(
+			array(
+				'post_type'  => Project::POST_TYPE,
+				'menu_order' => 1,
+			)
+		);
+		$second = self::factory()->post->create(
+			array(
+				'post_type'  => Project::POST_TYPE,
+				'menu_order' => 2,
+			)
+		);
+		$third  = self::factory()->post->create(
+			array(
+				'post_type'  => Project::POST_TYPE,
+				'menu_order' => 3,
+			)
+		);
+
+		$this->assertSame( $second, Project::next_after( $first ) );
+		$this->assertSame( $third, Project::next_after( $second ) );
+		$this->assertSame( $first, Project::next_after( $third ), 'The last Project points back to the first.' );
+	}
+
+	public function test_next_after_is_zero_with_a_single_project() {
+		$only = self::factory()->post->create( array( 'post_type' => Project::POST_TYPE ) );
+
+		$this->assertSame( 0, Project::next_after( $only ) );
+	}
+
+	public function test_next_after_skips_drafts() {
+		$first = self::factory()->post->create(
+			array(
+				'post_type'  => Project::POST_TYPE,
+				'menu_order' => 1,
+			)
+		);
+		self::factory()->post->create(
+			array(
+				'post_type'   => Project::POST_TYPE,
+				'menu_order'  => 2,
+				'post_status' => 'draft',
+			)
+		);
+		$third = self::factory()->post->create(
+			array(
+				'post_type'  => Project::POST_TYPE,
+				'menu_order' => 3,
+			)
+		);
+
+		$this->assertSame( $third, Project::next_after( $first ) );
 	}
 }

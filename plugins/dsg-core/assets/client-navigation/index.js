@@ -11,7 +11,10 @@
  * readers the page loaded. This file adds what it leaves out:
  * - scroll to the top, and move focus to the new page's heading;
  * - mark the current menu link and move the pill;
- * - close the mobile menu after a link in it is used.
+ * - close the mobile menu after a link in it is used;
+ * - filter links (the Project Grid's technology chips, marked with
+ *   data-dsg-filter) stay in place instead: no scroll to the top, focus
+ *   stays on the chosen chip, and only the cards animate in.
  *
  * Anything unexpected falls back to a normal page load.
  */
@@ -143,23 +146,44 @@ function focusNewContent( main ) {
 }
 
 /**
- * Replay the content's entrance animation (see style.css).
+ * After a filter link: put focus back on the chip that was chosen (the
+ * old one was replaced along with the rest of <main>).
  *
  * @param {HTMLElement} main The page's <main>.
+ * @param {string}      href The chip's href attribute.
+ * @return {boolean} True when the chip was found and focused.
  */
-function playEntrance( main ) {
-	main.classList.remove( 'is-entering' );
+function focusFilter( main, href ) {
+	const chip = [ ...main.querySelectorAll( 'a[data-dsg-filter]' ) ].find(
+		( link ) => link.getAttribute( 'href' ) === href
+	);
+
+	chip?.focus( { preventScroll: true } );
+	return Boolean( chip );
+}
+
+/**
+ * Replay an entrance animation (see style.css).
+ *
+ * @param {HTMLElement|null} element The element to animate.
+ */
+function playEntrance( element ) {
+	if ( ! element ) {
+		return;
+	}
+	element.classList.remove( 'is-entering' );
 	// Reading a layout value restarts the CSS animation.
-	void main.offsetWidth; // eslint-disable-line no-void
-	main.classList.add( 'is-entering' );
+	void element.offsetWidth; // eslint-disable-line no-void
+	element.classList.add( 'is-entering' );
 }
 
 /**
  * Show another page of the site without a full reload.
  *
- * @param {string} href The page URL.
+ * @param {string} href         The page URL.
+ * @param {string} [filterHref] For filter links: the chip's href attribute.
  */
-async function navigate( href ) {
+async function navigate( href, filterHref = '' ) {
 	const main = document.querySelector( REGION );
 	if ( ! main ) {
 		window.location.assign( href );
@@ -187,6 +211,14 @@ async function navigate( href ) {
 	placePills( true );
 	closeMobileMenu();
 
+	// Filtering: stay where the visitor is, and only animate the cards.
+	if ( filterHref && focusFilter( main, filterHref ) ) {
+		playEntrance(
+			main.querySelector( '.wp-block-dsg-project-grid__items' )
+		);
+		return;
+	}
+
 	// The router scrolls to a #section by itself; otherwise start at the top.
 	if ( ! new URL( href, window.location.href ).hash ) {
 		window.scrollTo( { top: 0, behavior: 'instant' } );
@@ -212,7 +244,12 @@ document.addEventListener( 'click', ( event ) => {
 		movePill( nav, link, true );
 	}
 
-	navigate( link.href );
+	navigate(
+		link.href,
+		link.hasAttribute( 'data-dsg-filter' )
+			? link.getAttribute( 'href' )
+			: ''
+	);
 } );
 
 // Start downloading a page when the pointer or keyboard focus reaches its link.

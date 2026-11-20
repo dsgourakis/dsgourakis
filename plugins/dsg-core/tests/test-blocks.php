@@ -24,7 +24,7 @@ class Test_Blocks extends WP_UnitTestCase {
 	public function test_blocks_are_registered() {
 		$registry = WP_Block_Type_Registry::get_instance();
 
-		foreach ( array( 'dsg/contact-form', 'dsg/hero', 'dsg/project-card', 'dsg/project-grid', 'dsg/section-header', 'dsg/stat', 'dsg/stats', 'dsg/tech-stack' ) as $name ) {
+		foreach ( array( 'dsg/contact-form', 'dsg/hero', 'dsg/project-card', 'dsg/project-grid', 'dsg/next-project', 'dsg/project-meta', 'dsg/section-header', 'dsg/stat', 'dsg/stats', 'dsg/tech-stack' ) as $name ) {
 			$this->assertTrue( $registry->is_registered( $name ), "$name is not registered. Did you run \"npm run build\"?" );
 		}
 	}
@@ -243,7 +243,212 @@ class Test_Blocks extends WP_UnitTestCase {
 		$this->assertSame( 2, substr_count( $html, 'wp-block-dsg-project-card__title' ) );
 	}
 
+	/**
+	 * Three Projects: two tagged PHP, one tagged React. "Unused" has none.
+	 *
+	 * @return void
+	 */
+	private function create_filter_projects(): void {
+		foreach ( array(
+			'PHP one'   => 'PHP',
+			'PHP two'   => 'PHP',
+			'React one' => 'React',
+		) as $title => $tech ) {
+			$id = self::factory()->post->create(
+				array(
+					'post_type'  => Project::POST_TYPE,
+					'post_title' => $title,
+				)
+			);
+			wp_set_object_terms( $id, array( $tech ), Project::TAXONOMY );
+		}
+		wp_insert_term( 'Unused', Project::TAXONOMY );
+	}
+
+	public function tear_down() {
+		unset( $_GET['tech'] );
+		parent::tear_down();
+	}
+
+	public function test_project_grid_filter_shows_all_projects_and_used_technologies() {
+		$this->create_filter_projects();
+
+		$html = do_blocks( '<!-- wp:dsg/project-grid {"showFilter":true,"numberOfItems":1} /-->' );
+
+		$this->assertSame( 3, substr_count( $html, 'wp-block-dsg-project-card__title' ), 'The filter view ignores the number setting.' );
+		$this->assertStringContainsString( 'aria-label="Filter projects by technology"', $html );
+		$this->assertMatchesRegularExpression( '/data-dsg-filter aria-current="true">All</', $html );
+		$this->assertStringContainsString( '?tech=php', $html );
+		$this->assertStringContainsString( '?tech=react', $html );
+		$this->assertStringNotContainsString( 'Unused', $html, 'Technologies without Projects get no chip.' );
+		$this->assertStringContainsString( '// 3 projects', $html );
+	}
+
+	public function test_project_grid_filter_reads_the_tech_query_arg() {
+		$this->create_filter_projects();
+		$_GET['tech'] = 'php';
+
+		$html = do_blocks( '<!-- wp:dsg/project-grid {"showFilter":true} /-->' );
+
+		$this->assertStringContainsString( 'PHP one', $html );
+		$this->assertStringContainsString( 'PHP two', $html );
+		$this->assertStringNotContainsString( 'React one', $html );
+		$this->assertMatchesRegularExpression( '/\?tech=php" data-dsg-filter aria-current="true">PHP</', $html );
+		$this->assertStringContainsString( '// 2 projects built with PHP', $html );
+	}
+
+	public function test_project_grid_filter_ignores_unknown_technologies() {
+		$this->create_filter_projects();
+		$_GET['tech'] = 'cobol';
+
+		$html = do_blocks( '<!-- wp:dsg/project-grid {"showFilter":true} /-->' );
+
+		$this->assertSame( 3, substr_count( $html, 'wp-block-dsg-project-card__title' ) );
+		$this->assertMatchesRegularExpression( '/data-dsg-filter aria-current="true">All</', $html );
+	}
+
 	public function test_project_grid_without_projects_renders_nothing() {
 		$this->assertSame( '', trim( do_blocks( '<!-- wp:dsg/project-grid /-->' ) ) );
+	}
+
+	public function test_project_meta_lists_only_filled_details() {
+		$project_id = self::factory()->post->create( array( 'post_type' => Project::POST_TYPE ) );
+		update_post_meta( $project_id, 'dsg_client', 'Red Cross' );
+		update_post_meta( $project_id, 'dsg_year', '2024' );
+
+		$html = $this->render_project_meta( $project_id );
+
+		$this->assertStringContainsString( '<dt>Client</dt>', $html );
+		$this->assertStringContainsString( 'Red Cross', $html );
+		$this->assertStringContainsString( '2024', $html );
+		$this->assertStringNotContainsString( '<dt>Role</dt>', $html );
+		$this->assertStringNotContainsString( '<dt>Live site</dt>', $html );
+	}
+
+	public function test_project_meta_links_the_live_site_in_a_new_tab() {
+		$project_id = self::factory()->post->create( array( 'post_type' => Project::POST_TYPE ) );
+		update_post_meta( $project_id, 'dsg_live_url', 'https://www.redcross.gr/' );
+
+		$html = $this->render_project_meta( $project_id );
+
+		$this->assertStringContainsString( 'href="https://www.redcross.gr/"', $html );
+		$this->assertStringContainsString( 'target="_blank" rel="noopener"', $html );
+		$this->assertStringContainsString( 'redcross.gr', $html );
+		$this->assertStringContainsString( '(opens in a new tab)', $html );
+	}
+
+	public function test_project_meta_prints_nothing_without_details() {
+		$project_id = self::factory()->post->create( array( 'post_type' => Project::POST_TYPE ) );
+
+		$this->assertSame( '', trim( $this->render_project_meta( $project_id ) ) );
+	}
+
+	public function test_tech_stack_can_list_the_projects_technologies() {
+		$project_id = self::factory()->post->create( array( 'post_type' => Project::POST_TYPE ) );
+		wp_set_object_terms( $project_id, array( 'PHP', 'React' ), Project::TAXONOMY );
+
+		$html = $this->render_with_project(
+			'dsg/tech-stack',
+			array(
+				'label'       => 'Built with',
+				'fromProject' => true,
+				'items'       => array( 'Ignored' ),
+			),
+			$project_id
+		);
+
+		$this->assertStringContainsString( '<li>PHP</li>', $html );
+		$this->assertStringContainsString( '<li>React</li>', $html );
+		$this->assertStringNotContainsString( 'Ignored', $html );
+	}
+
+	public function test_tech_stack_from_project_prints_nothing_without_technologies() {
+		$project_id = self::factory()->post->create( array( 'post_type' => Project::POST_TYPE ) );
+
+		$html = $this->render_with_project( 'dsg/tech-stack', array( 'fromProject' => true ), $project_id );
+
+		$this->assertSame( '', trim( $html ) );
+	}
+
+	public function test_next_project_shows_the_following_project_as_a_card() {
+		$current = self::factory()->post->create(
+			array(
+				'post_type'  => Project::POST_TYPE,
+				'post_title' => 'Current',
+				'menu_order' => 1,
+			)
+		);
+		self::factory()->post->create(
+			array(
+				'post_type'  => Project::POST_TYPE,
+				'post_title' => 'Ferries',
+				'menu_order' => 2,
+			)
+		);
+
+		$html = $this->render_with_project( 'dsg/next-project', array(), $current );
+
+		$this->assertStringContainsString( '<nav', $html );
+		$this->assertStringContainsString( 'aria-label="Next project"', $html );
+		$this->assertStringContainsString( 'wp-block-dsg-project-card', $html );
+		$this->assertStringContainsString( 'Ferries', $html );
+		$this->assertStringNotContainsString( '>Current<', $html );
+	}
+
+	public function test_next_project_prints_nothing_with_a_single_project() {
+		$only = self::factory()->post->create( array( 'post_type' => Project::POST_TYPE ) );
+
+		$this->assertSame( '', trim( $this->render_with_project( 'dsg/next-project', array(), $only ) ) );
+	}
+
+	/**
+	 * Render a block for a Project, as a template does (the Project ID
+	 * comes from the block context).
+	 *
+	 * @param string $name       Block name.
+	 * @param array  $attrs      Block attributes.
+	 * @param int    $project_id Project being shown.
+	 * @return string
+	 */
+	private function render_with_project( string $name, array $attrs, int $project_id ): string {
+		$block = new WP_Block(
+			array(
+				'blockName'    => $name,
+				'attrs'        => $attrs,
+				'innerBlocks'  => array(),
+				'innerHTML'    => '',
+				'innerContent' => array(),
+			),
+			array(
+				'postId'   => $project_id,
+				'postType' => Project::POST_TYPE,
+			)
+		);
+
+		return $block->render();
+	}
+
+	/**
+	 * Render the Project Details block for a Project, as the template does.
+	 *
+	 * @param int $project_id Project to show.
+	 * @return string
+	 */
+	private function render_project_meta( int $project_id ): string {
+		$block = new WP_Block(
+			array(
+				'blockName'    => 'dsg/project-meta',
+				'attrs'        => array(),
+				'innerBlocks'  => array(),
+				'innerHTML'    => '',
+				'innerContent' => array(),
+			),
+			array(
+				'postId'   => $project_id,
+				'postType' => Project::POST_TYPE,
+			)
+		);
+
+		return $block->render();
 	}
 }

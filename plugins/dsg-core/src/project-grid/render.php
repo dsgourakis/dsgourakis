@@ -6,6 +6,13 @@
  * so the grid reuses the card's markup, styles, numbering and featured
  * layout instead of duplicating them.
  *
+ * With "showFilter" on (the Portfolio page), it shows every Project with
+ * a row of technology chips above. The chips are plain links back to the
+ * same page with ?tech=<slug>, so filtering works without JavaScript and
+ * a filtered view can be shared. With JavaScript, dsg-core's client-side
+ * navigation swaps the results in place without a reload, keeping the
+ * scroll position and focus on the chip (assets/client-navigation/).
+ *
  * Available variables (WordPress provides them):
  * - $attributes: the block's data, as defined in block.json
  * - $content:    inner blocks' HTML (unused here)
@@ -16,18 +23,41 @@
 
 use DSG\Core\PostTypes\Project;
 
+$show_filter     = ! empty( $attributes['showFilter'] );
 $number_of_items = max( 1, min( 12, (int) ( $attributes['numberOfItems'] ?? 3 ) ) );
 $technology      = (int) ( $attributes['technology'] ?? 0 );
+
+// The filter's chips: technologies that have at least one published Project.
+$filter_terms = array();
+$active_term  = null;
+
+if ( $show_filter ) {
+	$filter_terms = get_terms(
+		array(
+			'taxonomy'   => Project::TAXONOMY,
+			'hide_empty' => true,
+			'orderby'    => 'name',
+		)
+	);
+	$filter_terms = is_wp_error( $filter_terms ) ? array() : $filter_terms;
+
+	// Read-only filter from the URL: no nonce needed. Unknown slugs are ignored.
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$requested = isset( $_GET['tech'] ) ? sanitize_title( wp_unslash( $_GET['tech'] ) ) : '';
+	foreach ( $filter_terms as $tech_term ) {
+		if ( $tech_term->slug === $requested ) {
+			$active_term = $tech_term;
+			$technology  = $tech_term->term_id;
+		}
+	}
+}
 
 $query_args = array(
 	'post_type'           => Project::POST_TYPE,
 	'post_status'         => 'publish',
-	'posts_per_page'      => $number_of_items,
-	// The "Order" field first (lowest first), then newest first.
-	'orderby'             => array(
-		'menu_order' => 'ASC',
-		'date'       => 'DESC',
-	),
+	// The Portfolio page shows them all; 100 keeps the query bounded.
+	'posts_per_page'      => $show_filter ? 100 : $number_of_items,
+	'orderby'             => Project::ORDERBY,
 	'ignore_sticky_posts' => true,
 	'no_found_rows'       => true, // No pagination, so skip counting all rows.
 );
@@ -53,34 +83,77 @@ if ( ! $projects ) {
 $cards = '';
 
 foreach ( $projects as $project ) {
-	$image_id     = (int) get_post_thumbnail_id( $project );
-	$technologies = wp_get_post_terms( $project->ID, Project::TAXONOMY, array( 'fields' => 'names' ) );
-
 	// render_block() runs the Project Card's render.php, which escapes everything.
-	$cards .= render_block(
-		array(
-			'blockName'    => 'dsg/project-card',
-			'attrs'        => array(
-				'title'        => get_the_title( $project ),
-				'summary'      => get_the_excerpt( $project ),
-				'url'          => get_permalink( $project ),
-				'imageId'      => $image_id,
-				'imageAlt'     => $image_id ? (string) get_post_meta( $image_id, '_wp_attachment_image_alt', true ) : '',
-				'technologies' => is_wp_error( $technologies ) ? array() : $technologies,
-			),
-			'innerBlocks'  => array(),
-			'innerHTML'    => '',
-			'innerContent' => array(),
-		)
+	$cards .= Project::render_card( $project );
+}
+
+// Without the filter, the wrapper is the grid itself (as before).
+if ( ! $show_filter ) {
+	$wrapper_attributes = get_block_wrapper_attributes();
+	?>
+	<div <?php echo wp_kses_data( $wrapper_attributes ); ?>>
+		<?php
+		// Each card's render.php already escaped its own output.
+		echo $cards; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		?>
+	</div>
+	<?php
+	return;
+}
+
+// The page's own address without ?tech=, for the chip links.
+$base_url = remove_query_arg( 'tech' );
+
+$chips = array(
+	array(
+		'label'   => __( 'All', 'dsg-core' ),
+		'url'     => $base_url,
+		'current' => null === $active_term,
+	),
+);
+
+foreach ( $filter_terms as $tech_term ) {
+	$chips[] = array(
+		'label'   => $tech_term->name,
+		'url'     => add_query_arg( 'tech', $tech_term->slug, $base_url ),
+		'current' => $active_term && $active_term->term_id === $tech_term->term_id,
 	);
 }
 
-// Adds the block's class, alignment and any margin from the sidebar.
-$wrapper_attributes = get_block_wrapper_attributes();
+$count       = count( $projects );
+$status_text = $active_term
+	? sprintf(
+		/* translators: 1: number of projects, 2: technology name. */
+		_n( '%1$d project built with %2$s', '%1$d projects built with %2$s', $count, 'dsg-core' ),
+		$count,
+		$active_term->name
+	)
+	: sprintf(
+		/* translators: %d: number of projects. */
+		_n( '%d project', '%d projects', $count, 'dsg-core' ),
+		$count
+	);
+
+$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => 'has-filter' ) );
 ?>
 <div <?php echo wp_kses_data( $wrapper_attributes ); ?>>
-	<?php
-	// Each card's render.php already escaped its own output.
-	echo $cards; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	?>
+	<div class="wp-block-dsg-project-grid__toolbar">
+		<nav class="wp-block-dsg-project-grid__filter" aria-label="<?php esc_attr_e( 'Filter projects by technology', 'dsg-core' ); ?>">
+			<ul>
+				<?php foreach ( $chips as $chip ) : ?>
+					<li>
+						<a href="<?php echo esc_url( $chip['url'] ); ?>" data-dsg-filter<?php echo $chip['current'] ? ' aria-current="true"' : ''; ?>><?php echo esc_html( $chip['label'] ); ?></a>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</nav>
+		<p class="wp-block-dsg-project-grid__status" role="status">// <?php echo esc_html( $status_text ); ?></p>
+	</div>
+
+	<div class="wp-block-dsg-project-grid__items">
+		<?php
+		// Each card's render.php already escaped its own output.
+		echo $cards; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		?>
+	</div>
 </div>

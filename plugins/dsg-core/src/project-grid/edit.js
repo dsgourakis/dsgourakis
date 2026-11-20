@@ -19,6 +19,7 @@ import {
 	Placeholder,
 	Spinner,
 	Flex,
+	ToggleControl,
 } from '@wordpress/components';
 
 import { sortProjects, technologyNames } from './utils';
@@ -94,9 +95,15 @@ function CardPreview( { project, image, technologies } ) {
 }
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { numberOfItems, technology } = attributes;
+	const { numberOfItems, technology, showFilter } = attributes;
 
-	const blockProps = useBlockProps();
+	// With the filter on, the frontend shows every Project, unfiltered by default.
+	const limit = showFilter ? MAX_PROJECTS : numberOfItems;
+	const termFilter = showFilter ? 0 : technology;
+
+	const blockProps = useBlockProps( {
+		className: showFilter ? 'has-filter' : undefined,
+	} );
 
 	// Everything the preview needs, read from the data store in one place.
 	const { projects, terms, images, isLoading } = useSelect(
@@ -107,12 +114,12 @@ export default function Edit( { attributes, setAttributes } ) {
 			const query = {
 				per_page: MAX_PROJECTS,
 				status: 'publish',
-				...( technology ? { [ TAXONOMY ]: technology } : {} ),
+				...( termFilter ? { [ TAXONOMY ]: termFilter } : {} ),
 			};
 			const termsQuery = { per_page: -1, hide_empty: false };
 
 			const records = getEntityRecords( 'postType', POST_TYPE, query );
-			const sorted = sortProjects( records ?? [], numberOfItems );
+			const sorted = sortProjects( records ?? [], limit );
 
 			// Featured images, keyed by Project ID. Each getMedia() call
 			// fetches one image; undefined until it arrives.
@@ -134,7 +141,7 @@ export default function Edit( { attributes, setAttributes } ) {
 				] ),
 			};
 		},
-		[ numberOfItems, technology ]
+		[ limit, termFilter ]
 	);
 
 	const technologyOptions = [
@@ -175,41 +182,106 @@ export default function Edit( { attributes, setAttributes } ) {
 		) );
 	}
 
+	// Same markup as render.php's filter row, for the preview only.
+	const usedTerms = ( terms ?? [] ).filter( ( term ) => term.count > 0 );
+	const filterPreview = showFilter && (
+		<div className="wp-block-dsg-project-grid__toolbar">
+			<div className="wp-block-dsg-project-grid__filter">
+				<ul>
+					<li>
+						<a
+							href="#all"
+							aria-current="true"
+							onClick={ ( event ) => event.preventDefault() }
+						>
+							{ __( 'All', 'dsg-core' ) }
+						</a>
+					</li>
+					{ usedTerms.map( ( term ) => (
+						<li key={ term.id }>
+							<a
+								href={ `#${ term.slug }` }
+								onClick={ ( event ) => event.preventDefault() }
+							>
+								{ decodeEntities( term.name ) }
+							</a>
+						</li>
+					) ) }
+				</ul>
+			</div>
+			<p className="wp-block-dsg-project-grid__status">
+				{ `// ${ projects.length } projects` }
+			</p>
+		</div>
+	);
+
 	return (
 		<>
 			<InspectorControls>
 				<PanelBody title={ __( 'Projects', 'dsg-core' ) }>
 					<Flex direction="column" gap={ 4 }>
-						<RangeControl
+						<ToggleControl
 							__nextHasNoMarginBottom
-							__next40pxDefaultSize
-							label={ __( 'Number of projects', 'dsg-core' ) }
-							value={ numberOfItems }
-							onChange={ ( value ) =>
-								setAttributes( { numberOfItems: value ?? 3 } )
-							}
-							min={ 1 }
-							max={ 12 }
-						/>
-						<SelectControl
-							__nextHasNoMarginBottom
-							__next40pxDefaultSize
-							label={ __( 'Technology', 'dsg-core' ) }
+							label={ __( 'Technology filter', 'dsg-core' ) }
 							help={ __(
-								'Only show Projects tagged with this technology.',
+								'For the Portfolio page: shows every Project, with technology chips above to filter them.',
 								'dsg-core'
 							) }
-							value={ String( technology ) }
-							options={ technologyOptions }
+							checked={ showFilter }
 							onChange={ ( value ) =>
-								setAttributes( { technology: Number( value ) } )
+								setAttributes( { showFilter: value } )
 							}
 						/>
+						{ ! showFilter && (
+							<>
+								<RangeControl
+									__nextHasNoMarginBottom
+									__next40pxDefaultSize
+									label={ __(
+										'Number of projects',
+										'dsg-core'
+									) }
+									value={ numberOfItems }
+									onChange={ ( value ) =>
+										setAttributes( {
+											numberOfItems: value ?? 3,
+										} )
+									}
+									min={ 1 }
+									max={ 12 }
+								/>
+								<SelectControl
+									__nextHasNoMarginBottom
+									__next40pxDefaultSize
+									label={ __( 'Technology', 'dsg-core' ) }
+									help={ __(
+										'Only show Projects tagged with this technology.',
+										'dsg-core'
+									) }
+									value={ String( technology ) }
+									options={ technologyOptions }
+									onChange={ ( value ) =>
+										setAttributes( {
+											technology: Number( value ),
+										} )
+									}
+								/>
+							</>
+						) }
 					</Flex>
 				</PanelBody>
 			</InspectorControls>
 
-			<div { ...blockProps }>{ preview }</div>
+			{ showFilter ? (
+				<div { ...blockProps }>
+					{ filterPreview }
+					<div className="wp-block-dsg-project-grid__items">
+						{ preview }
+					</div>
+				</div>
+			) : (
+				<div { ...blockProps }>{ preview }</div>
+			) }
 		</>
 	);
 }

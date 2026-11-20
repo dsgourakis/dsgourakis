@@ -16,6 +16,27 @@ class Project {
 	public const TAXONOMY  = 'dsg_technology';
 
 	/**
+	 * The order Projects are listed in everywhere: the "Order" field first
+	 * (lowest first), then newest first. Used by the Project Grid and
+	 * Next Project blocks.
+	 */
+	public const ORDERBY = array(
+		'menu_order' => 'ASC',
+		'date'       => 'DESC',
+	);
+
+	/**
+	 * Project details, shown in the "Project details" sidebar panel and by
+	 * the Project Meta block. Key => sanitize callback.
+	 */
+	public const META = array(
+		'dsg_client'   => 'sanitize_text_field',
+		'dsg_year'     => 'sanitize_text_field',
+		'dsg_role'     => 'sanitize_text_field',
+		'dsg_live_url' => 'esc_url_raw',
+	);
+
+	/**
 	 * Hook into WordPress.
 	 *
 	 * @return void
@@ -23,6 +44,7 @@ class Project {
 	public function register_hooks(): void {
 		add_action( 'init', array( $this, 'register_post_type' ) );
 		add_action( 'init', array( $this, 'register_taxonomy' ) );
+		add_action( 'init', array( $this, 'register_meta' ) );
 	}
 
 	/**
@@ -55,6 +77,9 @@ class Project {
 	/**
 	 * Register the Technology taxonomy (PHP, React, WooCommerce...).
 	 *
+	 * Technologies label Projects and filter the Portfolio page;
+	 * they have no pages of their own.
+	 *
 	 * @return void
 	 */
 	public function register_taxonomy(): void {
@@ -62,15 +87,114 @@ class Project {
 			self::TAXONOMY,
 			self::POST_TYPE,
 			array(
-				'labels'            => array(
+				'labels'             => array(
 					'name'          => __( 'Technologies', 'dsg-core' ),
 					'singular_name' => __( 'Technology', 'dsg-core' ),
 				),
-				'public'            => true,
-				'hierarchical'      => false,
-				'show_admin_column' => true,
-				'show_in_rest'      => true,
-				'rewrite'           => array( 'slug' => 'technology' ),
+				// No public pages: technologies are only used as filters on the
+				// Portfolio page (the Project Grid's ?tech= links), not as archives.
+				'public'             => false,
+				'publicly_queryable' => false,
+				'rewrite'            => false,
+				'query_var'          => false,
+				'show_ui'            => true,
+				'show_in_rest'       => true, // The editor's Technologies panel.
+				'show_admin_column'  => true,
+				'show_in_nav_menus'  => false,
+				'show_tagcloud'      => false,
+				'hierarchical'       => false,
+			)
+		);
+	}
+
+	/**
+	 * Register the project details (client, year, role, live site).
+	 *
+	 * The show_in_rest flag lets the block editor read and save them; the editor
+	 * panel lives in src/project-meta/.
+	 *
+	 * @return void
+	 */
+	public function register_meta(): void {
+		foreach ( self::META as $key => $sanitize ) {
+			register_post_meta(
+				self::POST_TYPE,
+				$key,
+				array(
+					'type'              => 'string',
+					'single'            => true,
+					'default'           => '',
+					'show_in_rest'      => true,
+					'sanitize_callback' => $sanitize,
+					'auth_callback'     => static function ( $allowed, $meta_key, $post_id ) {
+						return current_user_can( 'edit_post', $post_id );
+					},
+				)
+			);
+		}
+	}
+
+	/**
+	 * The Project listed after this one, wrapping round to the first.
+	 *
+	 * @param int $project_id The current Project.
+	 * @return int The next Project's ID, or 0 if there is no other Project.
+	 */
+	public static function next_after( int $project_id ): int {
+		$ids = get_posts(
+			array(
+				'post_type'           => self::POST_TYPE,
+				'post_status'         => 'publish',
+				'posts_per_page'      => 100, // Plenty for a portfolio; keeps the query bounded.
+				'orderby'             => self::ORDERBY,
+				'ignore_sticky_posts' => true,
+				'no_found_rows'       => true,
+				'fields'              => 'ids',
+			)
+		);
+
+		$position = array_search( $project_id, $ids, true );
+
+		// Not in the list (e.g. a draft being previewed): suggest the first one.
+		if ( false === $position ) {
+			return (int) ( $ids[0] ?? 0 );
+		}
+
+		if ( count( $ids ) < 2 ) {
+			return 0;
+		}
+
+		return (int) $ids[ ( $position + 1 ) % count( $ids ) ];
+	}
+
+	/**
+	 * A Project shown as a Project Card block.
+	 *
+	 * Used by the Project Grid and Next Project blocks, so every card on
+	 * the site comes from the same markup (project-card/render.php, which
+	 * escapes its output).
+	 *
+	 * @param \WP_Post $project The Project.
+	 * @return string Card HTML.
+	 */
+	public static function render_card( \WP_Post $project ): string {
+		$image_id     = (int) get_post_thumbnail_id( $project );
+		$technologies = wp_get_post_terms( $project->ID, self::TAXONOMY, array( 'fields' => 'names' ) );
+
+		return render_block(
+			array(
+				'blockName'    => 'dsg/project-card',
+				'attrs'        => array(
+					'title'        => get_the_title( $project ),
+					'summary'      => get_the_excerpt( $project ),
+					'url'          => get_permalink( $project ),
+					'imageId'      => $image_id,
+					'imageAlt'     => $image_id ? (string) get_post_meta( $image_id, '_wp_attachment_image_alt', true ) : '',
+					'technologies' => is_wp_error( $technologies ) ? array() : $technologies,
+				),
+				'innerBlocks'  => array(),
+				'innerHTML'    => '',
+				'innerContent' => array(),
 			)
 		);
 	}

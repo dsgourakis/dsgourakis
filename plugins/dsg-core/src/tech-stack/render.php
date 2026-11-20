@@ -5,7 +5,7 @@
  * Available variables (WordPress provides them):
  * - $attributes: the block's data, as defined in block.json
  * - $content:    inner blocks' HTML (unused here)
- * - $block:      the WP_Block instance
+ * - $block:      the WP_Block instance (its context holds the post ID)
  *
  * Accessibility: the chips are a real list, named by the label through
  * aria-labelledby, so screen readers announce "Stack, list, 5 items".
@@ -13,8 +13,19 @@
  * @package DSG\Core
  */
 
+use DSG\Core\PostTypes\Project;
+
 $stack_label = $attributes['label'] ?? '';
-$items       = array_filter( array_map( 'trim', (array) ( $attributes['items'] ?? array() ) ) );
+$items       = (array) ( $attributes['items'] ?? array() );
+
+// "Use the Project's technologies": the chips are the Project's Technology terms.
+if ( ! empty( $attributes['fromProject'] ) ) {
+	$project_id = (int) ( $block->context['postId'] ?? get_the_ID() );
+	$terms      = $project_id ? wp_get_post_terms( $project_id, Project::TAXONOMY, array( 'fields' => 'names' ) ) : array();
+	$items      = is_wp_error( $terms ) ? array() : $terms;
+}
+
+$items = array_filter( array_map( 'trim', $items ) );
 
 // No chips: nothing worth showing.
 if ( ! $items ) {

@@ -2,11 +2,11 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "dsg/project-grid",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"title": "Project Grid",
 	"category": "design",
 	"icon": "screenoptions",
-	"description": "Shows your Projects automatically as Project Cards: the first one featured across the full row, the rest in two columns. Sorted by each Project's Order field, then newest first.",
+	"description": "Shows your Projects automatically as Project Cards: the first one featured across the full row, the rest in two columns. Sorted by each Project's Order field, then newest first. Turn on the technology filter for the Portfolio page.",
 	"keywords": [ "portfolio", "projects", "work", "grid", "query" ],
 	"textdomain": "dsg-core",
 	"attributes": {
@@ -21,6 +21,10 @@
 		"technology": {
 			"type": "number",
 			"default": 0
+		},
+		"showFilter": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"supports": {
