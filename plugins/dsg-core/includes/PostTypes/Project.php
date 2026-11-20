@@ -30,11 +30,18 @@ class Project {
 	 * the Project Meta block. Key => sanitize callback.
 	 */
 	public const META = array(
-		'dsg_client'   => 'sanitize_text_field',
+		'dsg_agency'   => 'sanitize_text_field',
 		'dsg_year'     => 'sanitize_text_field',
 		'dsg_role'     => 'sanitize_text_field',
 		'dsg_live_url' => 'esc_url_raw',
 	);
+
+	/**
+	 * A screenshot of the live site's homepage (attachment ID), picked in the
+	 * "Project details" panel. Kept apart from META because it is an image,
+	 * not a text detail shown by the Project Meta block.
+	 */
+	public const SCREENSHOT_META = 'dsg_screenshot';
 
 	/**
 	 * Hook into WordPress.
@@ -108,7 +115,7 @@ class Project {
 	}
 
 	/**
-	 * Register the project details (client, year, role, live site).
+	 * Register the project details (agency, year, role, live site) and the screenshot.
 	 *
 	 * The show_in_rest flag lets the block editor read and save them; the editor
 	 * panel lives in src/project-meta/.
@@ -116,6 +123,10 @@ class Project {
 	 * @return void
 	 */
 	public function register_meta(): void {
+		$can_edit = static function ( $allowed, $meta_key, $post_id ) {
+			return current_user_can( 'edit_post', $post_id );
+		};
+
 		foreach ( self::META as $key => $sanitize ) {
 			register_post_meta(
 				self::POST_TYPE,
@@ -126,12 +137,23 @@ class Project {
 					'default'           => '',
 					'show_in_rest'      => true,
 					'sanitize_callback' => $sanitize,
-					'auth_callback'     => static function ( $allowed, $meta_key, $post_id ) {
-						return current_user_can( 'edit_post', $post_id );
-					},
+					'auth_callback'     => $can_edit,
 				)
 			);
 		}
+
+		register_post_meta(
+			self::POST_TYPE,
+			self::SCREENSHOT_META,
+			array(
+				'type'              => 'integer',
+				'single'            => true,
+				'default'           => 0,
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'absint',
+				'auth_callback'     => $can_edit,
+			)
+		);
 	}
 
 	/**

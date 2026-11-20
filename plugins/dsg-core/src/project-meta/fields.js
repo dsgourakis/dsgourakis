@@ -5,7 +5,7 @@
 import { __ } from '@wordpress/i18n';
 
 export const FIELDS = [
-	{ key: 'dsg_client', label: __( 'Client', 'dsg-core' ) },
+	{ key: 'dsg_agency', label: __( 'Agency', 'dsg-core' ) },
 	{ key: 'dsg_year', label: __( 'Year', 'dsg-core' ) },
 	{ key: 'dsg_role', label: __( 'Role', 'dsg-core' ) },
 	{

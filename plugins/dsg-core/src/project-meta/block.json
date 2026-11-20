@@ -6,8 +6,8 @@
 	"title": "Project Details",
 	"category": "theme",
 	"icon": "info-outline",
-	"description": "A row of the current Project's details: client, year, role and a link to the live site. Fill them in under \"Project details\" in the Project's sidebar.",
-	"keywords": [ "client", "year", "role", "live", "meta", "project" ],
+	"description": "A row of the current Project's details: agency, year, role and a link to the live site. Fill them in under \"Project details\" in the Project's sidebar.",
+	"keywords": [ "agency", "employer", "year", "role", "live", "meta", "project" ],
 	"textdomain": "dsg-core",
 	"usesContext": [ "postId", "postType" ],
 	"attributes": {

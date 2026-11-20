@@ -12,7 +12,7 @@ import { useEntityProp } from '@wordpress/core-data';
 import { filledFields, displayUrl } from './fields';
 
 const SAMPLE = {
-	dsg_client: __( 'Client name', 'dsg-core' ),
+	dsg_agency: __( 'Agency name', 'dsg-core' ),
 	dsg_year: '2025',
 	dsg_role: __( 'Lead developer', 'dsg-core' ),
 	dsg_live_url: 'https://example.com',

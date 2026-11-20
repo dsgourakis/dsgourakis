@@ -9,11 +9,86 @@ import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { PluginDocumentSettingPanel } from '@wordpress/editor';
-import { TextControl } from '@wordpress/components';
+import { BaseControl, Button, TextControl } from '@wordpress/components';
+import { MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
 
 import { FIELDS } from './fields';
 
 const POST_TYPE = 'dsg_project';
+const SCREENSHOT_KEY = 'dsg_screenshot';
+
+/**
+ * Picks the homepage screenshot (an attachment ID in the post's meta).
+ */
+function ScreenshotField() {
+	const [ meta, setMeta ] = useEntityProp( 'postType', POST_TYPE, 'meta' );
+	const imageId = meta?.[ SCREENSHOT_KEY ] || 0;
+	const imageUrl = useSelect(
+		( select ) => {
+			if ( ! imageId ) {
+				return '';
+			}
+			const media = select( 'core' ).getMedia( imageId, {
+				context: 'view',
+			} );
+			return (
+				media?.media_details?.sizes?.medium?.source_url ??
+				media?.source_url ??
+				''
+			);
+		},
+		[ imageId ]
+	);
+	const setImageId = ( id ) => setMeta( { ...meta, [ SCREENSHOT_KEY ]: id } );
+
+	return (
+		<BaseControl
+			__nextHasNoMarginBottom
+			id="dsg-project-screenshot"
+			label={ __( 'Homepage screenshot', 'dsg-core' ) }
+		>
+			<MediaUploadCheck>
+				<MediaUpload
+					onSelect={ ( media ) => setImageId( media.id ) }
+					allowedTypes={ [ 'image' ] }
+					value={ imageId }
+					render={ ( { open } ) => (
+						<div style={ { display: 'grid', gap: '8px' } }>
+							{ imageUrl && (
+								<img
+									src={ imageUrl }
+									alt=""
+									style={ {
+										width: '100%',
+										maxHeight: '200px',
+										objectFit: 'cover',
+										objectPosition: 'top',
+									} }
+								/>
+							) }
+							<div style={ { display: 'flex', gap: '8px' } }>
+								<Button variant="secondary" onClick={ open }>
+									{ imageId
+										? __( 'Replace', 'dsg-core' )
+										: __( 'Add screenshot', 'dsg-core' ) }
+								</Button>
+								{ !! imageId && (
+									<Button
+										variant="tertiary"
+										isDestructive
+										onClick={ () => setImageId( 0 ) }
+									>
+										{ __( 'Remove', 'dsg-core' ) }
+									</Button>
+								) }
+							</div>
+						</div>
+					) }
+				/>
+			</MediaUploadCheck>
+		</BaseControl>
+	);
+}
 
 function ProjectDetailsFields() {
 	const [ meta, setMeta ] = useEntityProp( 'postType', POST_TYPE, 'meta' );
@@ -49,6 +124,7 @@ export default function ProjectDetailsPanel() {
 		>
 			<div style={ { display: 'grid', gap: '16px' } }>
 				<ProjectDetailsFields />
+				<ScreenshotField />
 			</div>
 		</PluginDocumentSettingPanel>
 	);

@@ -37,6 +37,41 @@ function dsg_theme_setup() {
 add_action( 'after_setup_theme', 'dsg_theme_setup' );
 
 /**
+ * Names and descriptions for the theme's own templates in the Site Editor.
+ *
+ * WordPress names the standard templates (front-page, page, 404…) itself;
+ * any other file would show up as its bare file name. Templates picked from
+ * a page's Template panel (e.g. "Reading") are named in theme.json instead.
+ *
+ * @param array $types Template slug => title and description.
+ * @return array
+ */
+function dsg_theme_template_types( $types ) {
+	$types['single-dsg_project'] = array(
+		'title'       => __( 'Single Project', 'dsg-theme' ),
+		'description' => __( 'Case-study layout for one project: title, project details, cover image, "Built with" card and the next project.', 'dsg-theme' ),
+	);
+
+	$types['archive-dsg_project'] = array(
+		'title'       => __( 'Projects Archive', 'dsg-theme' ),
+		'description' => __( 'The Work page: every project as a card, with the technology filter.', 'dsg-theme' ),
+	);
+
+	$types['page-about'] = array(
+		'title'       => __( 'About Page', 'dsg-theme' ),
+		'description' => __( 'Used automatically for the page with the address "about". Big heading and intro above the page content.', 'dsg-theme' ),
+	);
+
+	$types['page-contact'] = array(
+		'title'       => __( 'Contact Page', 'dsg-theme' ),
+		'description' => __( 'Used automatically for the page with the address "contact". Big heading and intro above the page content; the footer\'s contact card is hidden here.', 'dsg-theme' ),
+	);
+
+	return $types;
+}
+add_filter( 'default_template_types', 'dsg_theme_template_types' );
+
+/**
  * On pages, show the Excerpt block only when an excerpt was written.
  *
  * Without this, WordPress makes one up from the first words of the page

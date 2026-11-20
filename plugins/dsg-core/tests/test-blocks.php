@@ -313,13 +313,13 @@ class Test_Blocks extends WP_UnitTestCase {
 
 	public function test_project_meta_lists_only_filled_details() {
 		$project_id = self::factory()->post->create( array( 'post_type' => Project::POST_TYPE ) );
-		update_post_meta( $project_id, 'dsg_client', 'Red Cross' );
+		update_post_meta( $project_id, 'dsg_agency', 'Acme Digital' );
 		update_post_meta( $project_id, 'dsg_year', '2024' );
 
 		$html = $this->render_project_meta( $project_id );
 
-		$this->assertStringContainsString( '<dt>Client</dt>', $html );
-		$this->assertStringContainsString( 'Red Cross', $html );
+		$this->assertStringContainsString( '<dt>Agency</dt>', $html );
+		$this->assertStringContainsString( 'Acme Digital', $html );
 		$this->assertStringContainsString( '2024', $html );
 		$this->assertStringNotContainsString( '<dt>Role</dt>', $html );
 		$this->assertStringNotContainsString( '<dt>Live site</dt>', $html );

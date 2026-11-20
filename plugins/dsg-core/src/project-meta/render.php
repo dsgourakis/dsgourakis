@@ -21,7 +21,7 @@ if ( ! $project_id ) {
 }
 
 $detail_labels = array(
-	'dsg_client'   => __( 'Client', 'dsg-core' ),
+	'dsg_agency'   => __( 'Agency', 'dsg-core' ),
 	'dsg_year'     => __( 'Year', 'dsg-core' ),
 	'dsg_role'     => __( 'Role', 'dsg-core' ),
 	'dsg_live_url' => __( 'Live site', 'dsg-core' ),

@@ -7,7 +7,7 @@
  * Block Types: core/post-content
  * Description: Starting point for a Project write-up: the problem, what was built, and the result with numbers.
  *
- * Offered when a new Project is created. The client, year, role, live
+ * Offered when a new Project is created. The agency, year, role, live
  * link, cover image and technologies are filled in elsewhere (sidebar),
  * so this is only the story.
  *

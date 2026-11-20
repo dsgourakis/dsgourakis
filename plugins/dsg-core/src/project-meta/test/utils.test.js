@@ -7,15 +7,15 @@ describe( 'filledFields', () => {
 	it( 'keeps only details with a value, in display order', () => {
 		const fields = filledFields( {
 			dsg_role: 'Lead developer',
-			dsg_client: 'Red Cross',
+			dsg_agency: 'Acme Digital',
 			dsg_year: '  ',
 		} );
 
 		expect( fields.map( ( field ) => field.key ) ).toEqual( [
-			'dsg_client',
+			'dsg_agency',
 			'dsg_role',
 		] );
-		expect( fields[ 0 ].value ).toBe( 'Red Cross' );
+		expect( fields[ 0 ].value ).toBe( 'Acme Digital' );
 	} );
 
 	it( 'handles missing meta', () => {

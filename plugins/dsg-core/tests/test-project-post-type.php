@@ -79,13 +79,25 @@ class Test_Project_Post_Type extends WP_UnitTestCase {
 		}
 	}
 
+	public function test_screenshot_is_registered_as_an_attachment_id() {
+		$registered = get_registered_meta_keys( 'post', Project::POST_TYPE );
+
+		$this->assertArrayHasKey( Project::SCREENSHOT_META, $registered );
+		$this->assertSame( 'integer', $registered[ Project::SCREENSHOT_META ]['type'] );
+		$this->assertTrue( (bool) $registered[ Project::SCREENSHOT_META ]['show_in_rest'] );
+
+		$project_id = self::factory()->post->create( array( 'post_type' => Project::POST_TYPE ) );
+		update_post_meta( $project_id, Project::SCREENSHOT_META, '-42' );
+		$this->assertSame( '42', get_post_meta( $project_id, Project::SCREENSHOT_META, true ) );
+	}
+
 	public function test_project_details_are_sanitized() {
 		$project_id = self::factory()->post->create( array( 'post_type' => Project::POST_TYPE ) );
 
-		update_post_meta( $project_id, 'dsg_client', '<b>Red Cross</b>' );
+		update_post_meta( $project_id, 'dsg_agency', '<b>Acme Digital</b>' );
 		update_post_meta( $project_id, 'dsg_live_url', 'javascript:alert(1)' );
 
-		$this->assertSame( 'Red Cross', get_post_meta( $project_id, 'dsg_client', true ) );
+		$this->assertSame( 'Acme Digital', get_post_meta( $project_id, 'dsg_agency', true ) );
 		$this->assertSame( '', get_post_meta( $project_id, 'dsg_live_url', true ) );
 	}
 
@@ -93,10 +105,10 @@ class Test_Project_Post_Type extends WP_UnitTestCase {
 		$project_id = self::factory()->post->create( array( 'post_type' => Project::POST_TYPE ) );
 
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
-		$this->assertFalse( current_user_can( 'edit_post_meta', $project_id, 'dsg_client' ) );
+		$this->assertFalse( current_user_can( 'edit_post_meta', $project_id, 'dsg_agency' ) );
 
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
-		$this->assertTrue( current_user_can( 'edit_post_meta', $project_id, 'dsg_client' ) );
+		$this->assertTrue( current_user_can( 'edit_post_meta', $project_id, 'dsg_agency' ) );
 	}
 
 	public function test_next_after_follows_the_order_field_and_wraps_round() {
