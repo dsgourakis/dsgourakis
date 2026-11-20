@@ -25,6 +25,3 @@ Thumbs.db
 /docs/header-and-navigation.md
 /docs/contact-form-mail.md
 /scripts/pull-db.sh
-
-# Legacy import: the old site's content, extracted from its backup
-/scripts/legacy-import/data/

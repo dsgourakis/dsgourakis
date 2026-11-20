@@ -212,6 +212,39 @@ class Test_Blocks extends WP_UnitTestCase {
 		$this->assertLessThan( strpos( $html, 'Hellenic Red Cross' ), strpos( $html, 'Golden Star Ferries' ) );
 	}
 
+	public function test_project_grid_marks_only_featured_projects() {
+		$featured = self::factory()->post->create(
+			array(
+				'post_type'  => Project::POST_TYPE,
+				'post_title' => 'Hellenic Red Cross',
+				'menu_order' => 0,
+			)
+		);
+		$plain    = self::factory()->post->create(
+			array(
+				'post_type'  => Project::POST_TYPE,
+				'post_title' => 'Golden Star Ferries',
+				'menu_order' => 1,
+			)
+		);
+		update_post_meta( $featured, Project::FEATURED_META, true );
+		wp_set_object_terms( $plain, array( 'Accessibility' ), Project::TAXONOMY );
+
+		// All Projects: the featured one is first and marked.
+		$html = do_blocks( '<!-- wp:dsg/project-grid /-->' );
+		$this->assertSame( 1, substr_count( $html, 'is-featured' ) );
+
+		// Filtered to a technology the featured Project doesn't have: the
+		// first card shown is not marked as featured.
+		$_GET['tech'] = 'accessibility';
+		$html         = do_blocks( '<!-- wp:dsg/project-grid {"showFilter":true} /-->' );
+		unset( $_GET['tech'] );
+
+		$this->assertStringContainsString( 'Golden Star Ferries', $html );
+		$this->assertStringNotContainsString( 'Hellenic Red Cross', $html );
+		$this->assertStringNotContainsString( 'is-featured', $html );
+	}
+
 	public function test_project_grid_respects_number_and_technology() {
 		$php   = self::factory()->post->create(
 			array(
@@ -393,6 +426,8 @@ class Test_Blocks extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'wp-block-dsg-project-card', $html );
 		$this->assertStringContainsString( 'Ferries', $html );
 		$this->assertStringNotContainsString( '>Current<', $html );
+		// Always the large card, even though "Ferries" isn't a featured Project.
+		$this->assertMatchesRegularExpression( '/<article class="[^"]*\bis-featured\b/', $html );
 	}
 
 	public function test_next_project_prints_nothing_with_a_single_project() {

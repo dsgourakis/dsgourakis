@@ -4,7 +4,8 @@
  *
  * Queries published Projects and prints each one as a Project Card block,
  * so the grid reuses the card's markup, styles, numbering and featured
- * layout instead of duplicating them.
+ * layout instead of duplicating them. A Project ticked as "Featured" gets
+ * the large layout when it comes first; otherwise every card is the same size.
  *
  * With "showFilter" on (the Portfolio page), it shows every Project with
  * a row of technology chips above. The chips are plain links back to the

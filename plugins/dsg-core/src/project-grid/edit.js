@@ -6,6 +6,7 @@
  *   triggers a REST request; when the data arrives the component re-renders.
  * - The preview uses the same class names as the Project Card's render.php,
  *   so the card styles (numbering, featured first card) apply here too.
+ *   Featured comes from the Project's dsg_featured meta, as on the frontend.
  */
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
@@ -54,7 +55,13 @@ function CardPreview( { project, image, technologies } ) {
 		image?.media_details?.sizes?.large?.source_url ?? image?.source_url;
 
 	return (
-		<article className="wp-block-dsg-project-card">
+		<article
+			className={
+				project.meta?.dsg_featured
+					? 'wp-block-dsg-project-card is-featured'
+					: 'wp-block-dsg-project-card'
+			}
+		>
 			{ imageUrl && (
 				<div className="wp-block-dsg-project-card__media">
 					<img src={ imageUrl } alt={ image.alt_text ?? '' } />

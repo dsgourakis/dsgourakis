@@ -4,7 +4,8 @@
  *
  * Prints the following Project as a Project Card, in a <nav> so screen
  * reader users can find it as "Next project" navigation. The card is the
- * first (and only) one in its container, so it gets the featured layout;
+ * first (and only) one in its container and always rendered as featured,
+ * so it gets the large layout whether or not that Project is featured;
  * style.scss swaps its "01 — featured" counter for "// next project".
  *
  * Available variables (WordPress provides them):
@@ -33,6 +34,6 @@ $wrapper_attributes = get_block_wrapper_attributes(
 <nav <?php echo wp_kses_data( $wrapper_attributes ); ?>>
 	<?php
 	// The card's render.php already escaped its own output.
-	echo Project::render_card( $next ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo Project::render_card( $next, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	?>
 </nav>

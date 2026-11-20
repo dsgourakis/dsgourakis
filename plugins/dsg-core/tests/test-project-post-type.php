@@ -91,6 +91,20 @@ class Test_Project_Post_Type extends WP_UnitTestCase {
 		$this->assertSame( '42', get_post_meta( $project_id, Project::SCREENSHOT_META, true ) );
 	}
 
+	public function test_featured_is_a_boolean_in_the_rest_api() {
+		$registered = get_registered_meta_keys( 'post', Project::POST_TYPE );
+
+		$this->assertArrayHasKey( Project::FEATURED_META, $registered );
+		$this->assertSame( 'boolean', $registered[ Project::FEATURED_META ]['type'] );
+		$this->assertTrue( (bool) $registered[ Project::FEATURED_META ]['show_in_rest'] );
+
+		$project_id = self::factory()->post->create( array( 'post_type' => Project::POST_TYPE ) );
+		$this->assertFalse( Project::is_featured( $project_id ) );
+
+		update_post_meta( $project_id, Project::FEATURED_META, true );
+		$this->assertTrue( Project::is_featured( $project_id ) );
+	}
+
 	public function test_project_details_are_sanitized() {
 		$project_id = self::factory()->post->create( array( 'post_type' => Project::POST_TYPE ) );
 

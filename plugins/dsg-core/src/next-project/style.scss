@@ -8,9 +8,9 @@
 
 .wp-block-dsg-next-project {
 
-	// Matches the featured card's own rule (.card:first-child .title::before)
-	// plus this wrapper, so it wins.
-	.wp-block-dsg-project-card:first-child .wp-block-dsg-project-card__title::before {
+	// Matches the featured card's own rule (.card.is-featured:first-child
+	// .title::before) plus this wrapper, so it wins.
+	.wp-block-dsg-project-card.is-featured:first-child .wp-block-dsg-project-card__title::before {
 		content: "// next project" / "";
 	}
 

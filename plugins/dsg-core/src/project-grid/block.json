@@ -6,7 +6,7 @@
 	"title": "Project Grid",
 	"category": "design",
 	"icon": "screenoptions",
-	"description": "Shows your Projects automatically as Project Cards: the first one featured across the full row, the rest in two columns. Sorted by each Project's Order field, then newest first. Turn on the technology filter for the Portfolio page.",
+	"description": "Shows your Projects automatically as Project Cards: in two columns, with a featured Project across the full row when it comes first. Sorted by each Project's Order field, then newest first. Turn on the technology filter for the Portfolio page.",
 	"keywords": [ "portfolio", "projects", "work", "grid", "query" ],
 	"textdomain": "dsg-core",
 	"attributes": {

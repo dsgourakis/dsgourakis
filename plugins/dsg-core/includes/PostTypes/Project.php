@@ -44,6 +44,14 @@ class Project {
 	public const SCREENSHOT_META = 'dsg_screenshot';
 
 	/**
+	 * "Featured project" checkbox in the "Project details" panel. A featured
+	 * Project gets the large, full-row card when it is the first card shown
+	 * (see project-card/style.scss), so a filtered list never promotes a
+	 * Project just because it happens to come first.
+	 */
+	public const FEATURED_META = 'dsg_featured';
+
+	/**
 	 * Hook into WordPress.
 	 *
 	 * @return void
@@ -154,6 +162,29 @@ class Project {
 				'auth_callback'     => $can_edit,
 			)
 		);
+
+		register_post_meta(
+			self::POST_TYPE,
+			self::FEATURED_META,
+			array(
+				'type'              => 'boolean',
+				'single'            => true,
+				'default'           => false,
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'rest_sanitize_boolean',
+				'auth_callback'     => $can_edit,
+			)
+		);
+	}
+
+	/**
+	 * Whether the Project is marked as featured.
+	 *
+	 * @param int $project_id The Project.
+	 * @return bool
+	 */
+	public static function is_featured( int $project_id ): bool {
+		return (bool) get_post_meta( $project_id, self::FEATURED_META, true );
 	}
 
 	/**
@@ -196,10 +227,12 @@ class Project {
 	 * the site comes from the same markup (project-card/render.php, which
 	 * escapes its output).
 	 *
-	 * @param \WP_Post $project The Project.
+	 * @param \WP_Post  $project  The Project.
+	 * @param bool|null $featured Show it as featured. Null (the default)
+	 *                            uses the Project's own "Featured" checkbox.
 	 * @return string Card HTML.
 	 */
-	public static function render_card( \WP_Post $project ): string {
+	public static function render_card( \WP_Post $project, ?bool $featured = null ): string {
 		$image_id     = (int) get_post_thumbnail_id( $project );
 		$technologies = wp_get_post_terms( $project->ID, self::TAXONOMY, array( 'fields' => 'names' ) );
 
@@ -213,6 +246,7 @@ class Project {
 					'imageId'      => $image_id,
 					'imageAlt'     => $image_id ? (string) get_post_meta( $image_id, '_wp_attachment_image_alt', true ) : '',
 					'technologies' => is_wp_error( $technologies ) ? array() : $technologies,
+					'featured'     => $featured ?? self::is_featured( $project->ID ),
 				),
 				'innerBlocks'  => array(),
 				'innerHTML'    => '',

@@ -9,13 +9,19 @@ import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { PluginDocumentSettingPanel } from '@wordpress/editor';
-import { BaseControl, Button, TextControl } from '@wordpress/components';
+import {
+	BaseControl,
+	Button,
+	CheckboxControl,
+	TextControl,
+} from '@wordpress/components';
 import { MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
 
 import { FIELDS } from './fields';
 
 const POST_TYPE = 'dsg_project';
 const SCREENSHOT_KEY = 'dsg_screenshot';
+const FEATURED_KEY = 'dsg_featured';
 
 /**
  * Picks the homepage screenshot (an attachment ID in the post's meta).
@@ -90,6 +96,28 @@ function ScreenshotField() {
 	);
 }
 
+/**
+ * "Featured project": the large, full-row card when it is listed first.
+ */
+function FeaturedField() {
+	const [ meta, setMeta ] = useEntityProp( 'postType', POST_TYPE, 'meta' );
+
+	return (
+		<CheckboxControl
+			__nextHasNoMarginBottom
+			label={ __( 'Featured project', 'dsg-core' ) }
+			help={ __(
+				'Shown as the large card when it is the first Project in a list.',
+				'dsg-core'
+			) }
+			checked={ !! meta?.[ FEATURED_KEY ] }
+			onChange={ ( value ) =>
+				setMeta( { ...meta, [ FEATURED_KEY ]: value } )
+			}
+		/>
+	);
+}
+
 function ProjectDetailsFields() {
 	const [ meta, setMeta ] = useEntityProp( 'postType', POST_TYPE, 'meta' );
 
@@ -123,6 +151,7 @@ export default function ProjectDetailsPanel() {
 			title={ __( 'Project details', 'dsg-core' ) }
 		>
 			<div style={ { display: 'grid', gap: '16px' } }>
+				<FeaturedField />
 				<ProjectDetailsFields />
 				<ScreenshotField />
 			</div>

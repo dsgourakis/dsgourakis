@@ -5,8 +5,10 @@
  *
  * Layout rules, CSS only (no settings):
  * - Cards are numbered automatically above the title: 01, 02, 03…
- * - The FIRST card in its container is featured: full row, text left,
- *   image right, "View the project" shown.
+ * - A featured card (is-featured) that is the FIRST card in its container
+ *   gets the large layout: full row, text left, image right, "View the
+ *   project" shown. Being first alone isn't enough, so a filtered list
+ *   doesn't label whatever comes first as featured.
  *
  * For the design's "1 full row + 2 halves", put all the cards in ONE
  * Group with a Grid layout (2 columns). The first card spans both columns.
@@ -143,8 +145,8 @@
 		outline-offset: 3px;
 	}
 
-	// Featured: the first card in its container.
-	&:first-child {
+	// Featured, and the first card in its container.
+	&.is-featured:first-child {
 		flex-direction: row;
 		flex-wrap: wrap;
 		gap: 2rem;

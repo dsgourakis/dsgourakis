@@ -6,7 +6,7 @@
 	"title": "Project Card",
 	"category": "design",
 	"icon": "portfolio",
-	"description": "A portfolio project with image, title, summary and a link. The first card in a group is shown as the featured one.",
+	"description": "A portfolio project with image, title, summary and a link. A featured card shown first in its group gets the large, full-row layout.",
 	"keywords": [ "portfolio", "project", "card" ],
 	"textdomain": "dsg-core",
 	"attributes": {
@@ -37,6 +37,10 @@
 			"type": "array",
 			"items": { "type": "string" },
 			"default": []
+		},
+		"featured": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"supports": {
@@ -55,7 +59,8 @@
 		"attributes": {
 			"title": "Hellenic Red Cross",
 			"summary": "Custom WordPress theme with reusable blocks and a full content migration.",
-			"technologies": [ "WordPress", "PHP", "ACF" ]
+			"technologies": [ "WordPress", "PHP", "ACF" ],
+			"featured": true
 		}
 	},
 	"render": "file:./render.php",

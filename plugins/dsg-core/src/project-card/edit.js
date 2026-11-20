@@ -13,13 +13,19 @@ import {
 	RichText,
 	InspectorControls,
 } from '@wordpress/block-editor';
-import { PanelBody, TextControl, Flex } from '@wordpress/components';
+import {
+	PanelBody,
+	TextControl,
+	ToggleControl,
+	Flex,
+} from '@wordpress/components';
 
 import ImagePicker from '../shared/image-picker';
 import { parseTechnologies, formatTechnologies } from './utils';
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { title, summary, url, imageAlt, technologies } = attributes;
+	const { title, summary, url, imageAlt, technologies, featured } =
+		attributes;
 
 	// Local state: the raw text in the "Technologies" field while typing.
 	const [ technologiesText, setTechnologiesText ] = useState(
@@ -27,7 +33,9 @@ export default function Edit( { attributes, setAttributes } ) {
 	);
 
 	const blockProps = useBlockProps( {
-		className: 'wp-block-dsg-project-card',
+		className: featured
+			? 'wp-block-dsg-project-card is-featured'
+			: 'wp-block-dsg-project-card',
 	} );
 
 	return (
@@ -36,6 +44,18 @@ export default function Edit( { attributes, setAttributes } ) {
 			<InspectorControls>
 				<PanelBody title={ __( 'Project settings', 'dsg-core' ) }>
 					<Flex direction="column" gap={ 4 }>
+						<ToggleControl
+							__nextHasNoMarginBottom
+							label={ __( 'Featured', 'dsg-core' ) }
+							help={ __(
+								'Large, full-row layout when this is the first card in its group.',
+								'dsg-core'
+							) }
+							checked={ featured }
+							onChange={ ( value ) =>
+								setAttributes( { featured: value } )
+							}
+						/>
 						<TextControl
 							__nextHasNoMarginBottom
 							__next40pxDefaultSize

@@ -18,7 +18,8 @@
  * - "View the project" is a real link; hidden text adds the project title
  *   so it isn't announced as an ambiguous "View the project" several times.
  *
- * The counter (01, 02…) and the featured layout of the first card come from CSS.
+ * The counter (01, 02…) comes from CSS. A featured card gets the is-featured
+ * class; CSS gives it the large layout only when it is the first card shown.
  *
  * @package DSG\Core
  */
@@ -30,9 +31,12 @@ $image_id     = $attributes['imageId'] ?? 0;
 $image_url    = $attributes['imageUrl'] ?? '';
 $image_alt    = $attributes['imageAlt'] ?? '';
 $technologies = $attributes['technologies'] ?? array();
+$featured     = ! empty( $attributes['featured'] );
 
 // Adds the block's class plus any color/spacing chosen in the sidebar.
-$wrapper_attributes = get_block_wrapper_attributes();
+$wrapper_attributes = get_block_wrapper_attributes(
+	$featured ? array( 'class' => 'is-featured' ) : array()
+);
 ?>
 <article <?php echo wp_kses_data( $wrapper_attributes ); ?>>
 	<?php if ( $image_id || $image_url ) : ?>
