@@ -35,7 +35,7 @@ Text Domain: dsg-theme
 	outline-offset: 3px;
 }
 
-/* Header Résumé button: rounded and filled, in the normal font. */
+/* Header Resume button: rounded and filled, in the normal font. */
 .site-header__cta .wp-block-button > .wp-block-button__link {
 	padding: 0.75rem 1.25rem;
 	border-radius: var(--wp--custom--radius--pill);
@@ -96,7 +96,7 @@ Text Domain: dsg-theme
 }
 
 /*
- * Header: "D.S" logo, the pill menu and the Résumé button (parts/header.html).
+ * Header: "D.S" logo, the pill menu and the Resume button (parts/header.html).
  */
 
 .site-logo {
@@ -279,6 +279,12 @@ main.is-entering {
 	gap: 1.125rem;
 }
 
+/*
+ * Resets the headings' and paragraphs' own margins. It doesn't fight the
+ * ":root :is(.is-layout-flow…) > *" rule near the top: both set
+ * margin-block-start to 0, so the order/specificity warning is harmless.
+ */
+/* stylelint-disable-next-line no-descending-specificity */
 .site-footer__intro > * {
 	margin: 0;
 }

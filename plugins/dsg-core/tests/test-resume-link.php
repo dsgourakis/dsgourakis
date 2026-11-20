@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for the Résumé link setting and its block binding.
+ * Tests for the Resume link setting and its block binding.
  *
  * @package DSG\Core
  */
@@ -14,9 +14,9 @@ use DSG\Core\Settings\ResumeLink;
 class Test_Resume_Link extends WP_UnitTestCase {
 
 	/**
-	 * A Buttons group with one button bound to the résumé, like the header's.
+	 * A Buttons group with one button bound to the resume, like the header's.
 	 */
-	private const MARKUP = '<!-- wp:buttons --><div class="wp-block-buttons"><!-- wp:button {"metadata":{"bindings":{"url":{"source":"dsg-core/resume"}}}} --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" target="_blank" rel="noreferrer noopener">Résumé</a></div><!-- /wp:button --></div><!-- /wp:buttons -->';
+	private const MARKUP = '<!-- wp:buttons --><div class="wp-block-buttons"><!-- wp:button {"metadata":{"bindings":{"url":{"source":"dsg-core/resume"}}}} --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" target="_blank" rel="noreferrer noopener">Resume</a></div><!-- /wp:button --></div><!-- /wp:buttons -->';
 
 	/**
 	 * Create an attachment with the given MIME type.

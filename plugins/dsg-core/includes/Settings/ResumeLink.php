@@ -1,6 +1,6 @@
 <?php
 /**
- * The Résumé link: one site-wide setting that any button can use.
+ * The Resume link: one site-wide setting that any button can use.
  *
  * @package DSG\Core
  */
@@ -10,9 +10,9 @@ namespace DSG\Core\Settings;
 use WP_Block;
 
 /**
- * Stores which PDF is the résumé, and feeds its URL to blocks.
+ * Stores which PDF is the resume, and feeds its URL to blocks.
  *
- * - Setting: Settings > General > Résumé.
+ * - Setting: Settings > General > Resume.
  * - Permanent URL: /cv.pdf always serves the chosen PDF.
  * - Block binding: a Button bound to the "dsg-core/resume" source gets
  *   /cv.pdf as its link.
@@ -65,7 +65,7 @@ class ResumeLink {
 			self::OPTION,
 			array(
 				'type'              => 'integer',
-				'description'       => __( 'Attachment ID of the résumé PDF.', 'dsg-core' ),
+				'description'       => __( 'Attachment ID of the resume PDF.', 'dsg-core' ),
 				'sanitize_callback' => array( self::class, 'sanitize' ),
 				'show_in_rest'      => true,
 				'default'           => 0,
@@ -82,7 +82,7 @@ class ResumeLink {
 		register_block_bindings_source(
 			self::SOURCE,
 			array(
-				'label'              => __( 'Résumé PDF', 'dsg-core' ),
+				'label'              => __( 'Resume PDF', 'dsg-core' ),
 				'get_value_callback' => array( self::class, 'url' ),
 			)
 		);
@@ -96,7 +96,7 @@ class ResumeLink {
 	public function add_settings_field(): void {
 		add_settings_field(
 			self::OPTION,
-			__( 'Résumé', 'dsg-core' ),
+			__( 'Resume', 'dsg-core' ),
 			array( $this, 'render_field' ),
 			'general',
 			'default',
@@ -123,7 +123,7 @@ class ResumeLink {
 		$current = (int) get_option( self::OPTION, 0 );
 
 		printf( '<select id="%1$s" name="%1$s">', esc_attr( self::OPTION ) );
-		printf( '<option value="0">%s</option>', esc_html__( '— None (hide the Résumé button) —', 'dsg-core' ) );
+		printf( '<option value="0">%s</option>', esc_html__( '— None (hide the Resume button) —', 'dsg-core' ) );
 		foreach ( $pdfs as $pdf ) {
 			printf(
 				'<option value="%d"%s>%s</option>',
@@ -136,7 +136,7 @@ class ResumeLink {
 
 		printf(
 			'<p class="description">%s <a href="%s">%s</a></p>',
-			esc_html__( 'The PDF the header’s Résumé button opens. To use a new version,', 'dsg-core' ),
+			esc_html__( 'The PDF the header’s Resume button opens. To use a new version,', 'dsg-core' ),
 			esc_url( admin_url( 'media-new.php' ) ),
 			esc_html__( 'upload it to the Media Library first.', 'dsg-core' )
 		);
@@ -161,7 +161,7 @@ class ResumeLink {
 	}
 
 	/**
-	 * The résumé's permanent URL (/cv.pdf), or null when none is set or the file is gone.
+	 * The resume's permanent URL (/cv.pdf), or null when none is set or the file is gone.
 	 *
 	 * Also the bindings callback, which is why it returns null rather than "":
 	 * null tells WordPress to leave the block's own value alone.
@@ -189,11 +189,11 @@ class ResumeLink {
 	}
 
 	/**
-	 * Answer requests for /cv.pdf with the current résumé.
+	 * Answer requests for /cv.pdf with the current resume.
 	 *
 	 * Runs on "parse_request": WordPress has worked out the requested path
 	 * but hasn't queried posts yet. No rewrite rule needed, so nothing to
-	 * flush. Any other path, or no résumé set, falls through untouched.
+	 * flush. Any other path, or no resume set, falls through untouched.
 	 *
 	 * @param \WP $wp The current request.
 	 * @return void
@@ -240,9 +240,9 @@ class ResumeLink {
 	}
 
 	/**
-	 * Don't show a button bound to the résumé when there is no résumé.
+	 * Don't show a button bound to the resume when there is no resume.
 	 *
-	 * Runs after WordPress has applied the binding, so a set résumé is
+	 * Runs after WordPress has applied the binding, so a set resume is
 	 * already in the button's href by now.
 	 *
 	 * @param string $block_content The Button block's HTML.
