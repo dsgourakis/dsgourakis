@@ -79,3 +79,17 @@ export function scrollToReveal( bar, chip, fade ) {
 	}
 	return bar.scrollLeft;
 }
+
+/**
+ * How far one click on a filter-bar arrow scrolls: most of the visible
+ * width, minus both faded edges, so the chip that was half-hidden under
+ * the fade ends up fully in view rather than skipped. Never less than half
+ * the bar, so it still moves on a narrow bar.
+ *
+ * @param {number} clientWidth The bar's visible width.
+ * @param {number} fade        Width of each faded edge, in px.
+ * @return {number} The distance to scroll, in px.
+ */
+export function arrowStep( clientWidth, fade ) {
+	return Math.max( clientWidth - 2 * fade, clientWidth / 2 );
+}

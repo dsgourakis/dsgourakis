@@ -141,15 +141,36 @@ $wrapper_attributes = get_block_wrapper_attributes( array( 'class' => 'has-filte
 ?>
 <div <?php echo wp_kses_data( $wrapper_attributes ); ?>>
 	<div class="wp-block-dsg-project-grid__toolbar">
-		<nav class="wp-block-dsg-project-grid__filter" aria-label="<?php esc_attr_e( 'Filter projects by technology', 'dsg-core' ); ?>">
+		<nav class="wp-block-dsg-project-grid__filter" aria-label="<?php esc_attr_e( 'Filter projects by technology', 'dsg-core' ); ?>" data-wp-interactive="dsg/project-grid">
 			<?php // One line of chips that scrolls sideways; view.js adds the edge fades. ?>
-			<ul data-wp-interactive="dsg/project-grid" data-wp-init="callbacks.initFilter" data-wp-on--scroll="callbacks.onScroll">
+			<ul data-wp-init="callbacks.initFilter" data-wp-on--scroll="callbacks.onScroll">
 				<?php foreach ( $chips as $chip ) : ?>
 					<li>
 						<a href="<?php echo esc_url( $chip['url'] ); ?>" data-dsg-filter<?php echo $chip['current'] ? ' aria-current="true"' : ''; ?>><?php echo esc_html( $chip['label'] ); ?></a>
 					</li>
 				<?php endforeach; ?>
 			</ul>
+			<?php
+			/*
+			 * Arrows for mouse users, shown over an edge with more chips
+			 * (style.scss). They come after the <ul> so CSS can show each one
+			 * from the <ul>'s has-more-* class. They're hidden from screen
+			 * readers and keyboards: Tab already scrolls each chip into view,
+			 * so the arrows would only repeat that. They're <div>s, not
+			 * buttons, because a click focuses a button even with
+			 * tabindex="-1", and focus inside aria-hidden is an error (Chrome
+			 * warns about it). A <div> never takes focus.
+			 */
+			$arrows = array(
+				'prev' => 'm15 18-6-6 6-6',
+				'next' => 'm9 18 6-6-6-6',
+			);
+			foreach ( $arrows as $direction => $chevron ) :
+				?>
+				<div class="wp-block-dsg-project-grid__arrow is-<?php echo esc_attr( $direction ); ?>" aria-hidden="true" data-wp-on--click="actions.scroll<?php echo esc_attr( ucfirst( $direction ) ); ?>">
+					<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="<?php echo esc_attr( $chevron ); ?>"/></svg>
+				</div>
+			<?php endforeach; ?>
 		</nav>
 		<p class="wp-block-dsg-project-grid__status" role="status">// <?php echo esc_html( $status_text ); ?></p>
 	</div>

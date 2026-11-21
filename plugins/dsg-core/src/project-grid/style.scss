@@ -52,6 +52,7 @@
 	border-radius: var(--wp--custom--radius--card, 20px);
 	background-color: var(--wp--preset--color--surface, transparent);
 	overflow: hidden;
+	position: relative; // The arrows sit on its edges.
 }
 
 .wp-block-dsg-project-grid__filter ul {
@@ -83,6 +84,56 @@
 
 	&.has-more-end {
 		--fade-end: var(--fade);
+	}
+}
+
+// Round arrows over an edge with more chips, like YouTube's and
+// Google's chip rows: a mouse wheel can't scroll sideways, so these give
+// mouse users a way through. Only for a mouse (touch and trackpads swipe),
+// and only on an edge that has more chips: view.js sets has-more-* on the
+// <ul>, and the arrows come after it in render.php so ~ can reach them.
+// Each one sits inside its edge's fade, over the half-hidden chip.
+.wp-block-dsg-project-grid__arrow {
+	display: none;
+	position: absolute;
+	top: 50%;
+	z-index: 1;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	padding: 0;
+	border: 1px solid var(--wp--preset--color--border, currentcolor);
+	border-radius: 50%;
+	background-color: var(--wp--preset--color--surface, Canvas);
+	color: var(--wp--preset--color--contrast, inherit);
+	cursor: pointer;
+	user-select: none; // Double-clicking an arrow doesn't select text nearby.
+	translate: 0 -50%;
+	transition: background-color 0.2s;
+
+	&.is-prev {
+		left: 0.25rem;
+	}
+
+	&.is-next {
+		right: 0.25rem;
+	}
+
+	&:hover {
+		background-color: var(--wp--preset--color--border, currentcolor);
+	}
+
+	svg {
+		display: block;
+	}
+}
+
+@media (hover: hover) and (pointer: fine) {
+
+	.wp-block-dsg-project-grid__filter ul.has-more-start ~ .wp-block-dsg-project-grid__arrow.is-prev,
+	.wp-block-dsg-project-grid__filter ul.has-more-end ~ .wp-block-dsg-project-grid__arrow.is-next {
+		display: flex;
 	}
 }
 

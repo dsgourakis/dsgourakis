@@ -6,6 +6,7 @@ import {
 	technologyNames,
 	hiddenEdges,
 	scrollToReveal,
+	arrowStep,
 } from '../utils';
 
 describe( 'sortProjects', () => {
@@ -103,5 +104,15 @@ describe( 'scrollToReveal', () => {
 		expect(
 			scrollToReveal( scrolled, { left: 10, width: 80 }, fade )
 		).toBe( 0 );
+	} );
+} );
+
+describe( 'arrowStep', () => {
+	it( 'scrolls the visible width minus both fades', () => {
+		expect( arrowStep( 600, 48 ) ).toBe( 504 );
+	} );
+
+	it( 'scrolls at least half the bar when it is narrow', () => {
+		expect( arrowStep( 150, 48 ) ).toBe( 75 );
 	} );
 } );
