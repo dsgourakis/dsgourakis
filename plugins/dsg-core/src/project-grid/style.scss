@@ -26,32 +26,73 @@
 	grid-column: 1 / -1;
 }
 
-// Filter chips on the left, "// 5 projects" on the right; stacks when narrow.
+// Filter chips on the left, "// 5 projects" on the right. The chips stay
+// on one line and scroll sideways, so adding technologies never pushes
+// the status onto its own row. Below 782px the status goes under the bar.
 .wp-block-dsg-project-grid__toolbar {
 	display: flex;
-	flex-wrap: wrap;
 	align-items: center;
 	justify-content: space-between;
 	gap: var(--wp--preset--spacing--30, 1rem);
 	margin-bottom: var(--wp--preset--spacing--40, 1.5rem);
+
+	@media (max-width: 781px) {
+		flex-direction: column;
+		align-items: flex-start;
+	}
 }
 
 // Same look as the header's pill menu: a rounded bar of links, the
-// current one highlighted.
+// current one highlighted. The bar (border, background) is the <nav>;
+// the <ul> inside it is what scrolls, so the fades don't touch the border.
+.wp-block-dsg-project-grid__filter {
+	min-width: 0; // Lets the bar shrink below its chips' width (then it scrolls).
+	max-width: 100%;
+	border: 1px solid var(--wp--preset--color--border, currentcolor);
+	border-radius: var(--wp--custom--radius--card, 20px);
+	background-color: var(--wp--preset--color--surface, transparent);
+	overflow: hidden;
+}
+
 .wp-block-dsg-project-grid__filter ul {
+	--fade: 3rem;
+	position: relative; // Chips' offsetLeft is measured from here (view.js).
 	display: flex;
-	flex-wrap: wrap;
 	gap: 0.25rem;
 	margin: 0;
 	padding: 0.25rem;
 	list-style: none;
-	border: 1px solid var(--wp--preset--color--border, currentcolor);
-	border-radius: var(--wp--custom--radius--card, 20px);
-	background-color: var(--wp--preset--color--surface, transparent);
+	overflow-x: auto;
+	overscroll-behavior-x: contain;
+	scrollbar-width: none;
+	// Keyboard focus scrolls a chip clear of the fade, not just to the edge.
+	scroll-padding-inline: var(--fade);
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
+
+	// More chips out of view: fade that edge (classes set by view.js).
+	--fade-start: 0%;
+	--fade-end: 0%;
+	mask-image: linear-gradient(to right, transparent, #000 var(--fade-start), #000 calc(100% - var(--fade-end)), transparent);
+
+	&.has-more-start {
+		--fade-start: var(--fade);
+	}
+
+	&.has-more-end {
+		--fade-end: var(--fade);
+	}
+}
+
+.wp-block-dsg-project-grid__filter li {
+	flex: none;
 }
 
 .wp-block-dsg-project-grid__filter a {
 	display: block;
+	white-space: nowrap;
 	padding: 0.5rem 1rem;
 	border-radius: var(--wp--custom--radius--pill, 99px);
 	font-size: var(--wp--preset--font-size--small, 0.9375rem);
@@ -71,7 +112,13 @@
 	}
 }
 
+// The scrolling list clips outside rings, so draw it inside the chip.
+.wp-block-dsg-project-grid__filter a:focus-visible {
+	outline-offset: -3px;
+}
+
 .wp-block-dsg-project-grid__status {
+	flex: none;
 	margin: 0;
 	font-family: var(--wp--preset--font-family--mono, monospace);
 	font-size: var(--wp--preset--font-size--x-small, 0.8125rem);

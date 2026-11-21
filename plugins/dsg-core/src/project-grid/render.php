@@ -13,6 +13,8 @@
  * a filtered view can be shared. With JavaScript, dsg-core's client-side
  * navigation swaps the results in place without a reload, keeping the
  * scroll position and focus on the chip (assets/client-navigation/).
+ * The chips stay on one line and scroll sideways when there are more than
+ * fit; view.js fades the edges and keeps the chosen chip in view.
  *
  * Available variables (WordPress provides them):
  * - $attributes: the block's data, as defined in block.json
@@ -140,7 +142,8 @@ $wrapper_attributes = get_block_wrapper_attributes( array( 'class' => 'has-filte
 <div <?php echo wp_kses_data( $wrapper_attributes ); ?>>
 	<div class="wp-block-dsg-project-grid__toolbar">
 		<nav class="wp-block-dsg-project-grid__filter" aria-label="<?php esc_attr_e( 'Filter projects by technology', 'dsg-core' ); ?>">
-			<ul>
+			<?php // One line of chips that scrolls sideways; view.js adds the edge fades. ?>
+			<ul data-wp-interactive="dsg/project-grid" data-wp-init="callbacks.initFilter" data-wp-on--scroll="callbacks.onScroll">
 				<?php foreach ( $chips as $chip ) : ?>
 					<li>
 						<a href="<?php echo esc_url( $chip['url'] ); ?>" data-dsg-filter<?php echo $chip['current'] ? ' aria-current="true"' : ''; ?>><?php echo esc_html( $chip['label'] ); ?></a>

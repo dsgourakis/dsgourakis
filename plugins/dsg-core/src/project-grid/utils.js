@@ -35,3 +35,47 @@ export function technologyNames( termIds = [], terms = [] ) {
 		.map( ( id ) => terms.find( ( term ) => term.id === id )?.name )
 		.filter( Boolean );
 }
+
+/**
+ * Which edges of the scrolling filter bar have chips out of view.
+ *
+ * A 1px tolerance absorbs the fractional scroll positions some browsers
+ * report when zoomed.
+ *
+ * @param {number} scrollLeft  How far the bar is scrolled.
+ * @param {number} clientWidth The bar's visible width.
+ * @param {number} scrollWidth The width of all its chips together.
+ * @return {{start: boolean, end: boolean}} True for each edge with more to see.
+ */
+export function hiddenEdges( scrollLeft, clientWidth, scrollWidth ) {
+	return {
+		start: scrollLeft > 1,
+		end: scrollLeft + clientWidth < scrollWidth - 1,
+	};
+}
+
+/**
+ * Where to scroll the filter bar so a chip is fully visible, clear of the
+ * faded edges. Leaves the bar where it is when the chip already fits.
+ *
+ * @param {Object} bar             The bar's current scroll state.
+ * @param {number} bar.scrollLeft  How far it is scrolled.
+ * @param {number} bar.clientWidth Its visible width.
+ * @param {Object} chip            The chip's position inside the bar.
+ * @param {number} chip.left       Its left edge (offsetLeft).
+ * @param {number} chip.width      Its width.
+ * @param {number} fade            Width of each faded edge, in px.
+ * @return {number} The scrollLeft to use.
+ */
+export function scrollToReveal( bar, chip, fade ) {
+	const start = bar.scrollLeft + fade;
+	const end = bar.scrollLeft + bar.clientWidth - fade;
+
+	if ( chip.left < start ) {
+		return Math.max( 0, chip.left - fade );
+	}
+	if ( chip.left + chip.width > end ) {
+		return chip.left + chip.width + fade - bar.clientWidth;
+	}
+	return bar.scrollLeft;
+}
